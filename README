@@ -51,7 +51,7 @@ Instructions:
       (you will be asked for input arguments)
 
 
-Note: 
+Note1: 
   in order to have several analyses in this directory, one can
     mv -i src/analysisClass.C src/analysisClass_ONE.C
     ln -sf analysisClass_ONE.C src/analysisClass.C 
@@ -60,3 +60,16 @@ Note:
   then do
     ln -sf analysisClass_TWO.C src/analysisClass.C 
   and compile/run as above.
+
+Note2: 
+  a CVS area to commit all the analysis macros such as analysisClass_XXX.C
+  has been prepared in 
+  http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/Leptoquarks/rootNtupleMacros/src/
+  This will allow to separate the developments of the rootNtupleAnalyzer package
+  and the developments of the analysis macros.
+  In order to compile and run an analysis macro named analysisClass_XXX.C and stored 
+  in a directory  /...fullPath.../rootNtupleMacros/src/, do:
+    ln -sf /...fullPath.../rootNtupleMacros/src/analysisClass_XXX.C src/analysisClass.C
+  and compile/run as above.
+
+
