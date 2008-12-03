@@ -19,9 +19,13 @@ analysisClass::~analysisClass()
 void analysisClass::Loop()
 {
    std::cout << "analysisClass::Loop() begins" <<std::endl;   
-   
+    
    if (fChain == 0) return;
    
+   //////////book histos here
+
+   /////////initialize variables
+
    Long64_t nentries = fChain->GetEntriesFast();
    std::cout << "analysisClass::Loop(): nentries = " << nentries << std::endl;   
 
@@ -38,8 +42,13 @@ void analysisClass::Loop()
 
      ////////////////////// User's code starts here ///////////////////////
 
+     ///Stuff to be done every event
+
 
      ////////////////////// User's code ends here ///////////////////////
    }
+
+   //////////write histos 
+
    std::cout << "analysisClass::Loop() ends" <<std::endl;   
 }
