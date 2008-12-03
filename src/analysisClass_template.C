@@ -1,5 +1,12 @@
 #define analysisClass_cxx
 #include "analysisClass.h"
+#include <TH2.h>
+#include <TH1F.h>
+#include <TStyle.h>
+#include <TCanvas.h>
+#include <TLorentzVector.h>
+#include <TVector2.h>
+#include <TVector3.h>
 
 analysisClass::analysisClass(string * inputList, string * treeName, TString * outputFileName)
   :baseClass(inputList, treeName, outputFileName)
