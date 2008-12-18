@@ -73,3 +73,6 @@ Note2:
   and compile/run as above.
 
 
+Additional scripts:
+
+  script/createList.pl: it creates a .txt list of .root input files to be used as input for the "main"
