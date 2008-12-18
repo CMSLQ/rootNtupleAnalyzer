@@ -92,7 +92,7 @@ for $file(@inputList)
     }
 
     open(LISTFILENAME,">>$listfilename");
-    print LISTFILENAME "$file\n";
+    print LISTFILENAME "$inputDir/$file\n";
     close(LISTFILENAME);
 }
 
