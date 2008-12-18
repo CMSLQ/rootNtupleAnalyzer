@@ -75,4 +75,5 @@ Note2:
 
 Additional scripts:
 
-  script/createList.pl: it creates a .txt list of .root input files to be used as input for the "main"
+  script/createList.pl: it creates a .txt list of .root input files to be used as input for the analysis
+  script/launchAnalysis.pl: it launches the analysis jobs for all the lists created by "script/createList.pl"
