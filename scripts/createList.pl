@@ -37,26 +37,14 @@ open (INPUTLIST, "ls $inputDir | grep $MATCH |") || die ("...error reading file 
 #print @inputList;
 close(INPUTLIST);
 
+
+my @AllLists;
+my $AllListsFilename="$outputDir/inputListAllCurrent.txt";
+system "rm -f $AllListsFilename";
+
 #first loop to remove the old files
 for $file(@inputList)
 {
-
-    ## split each line
-    my ($dataset) = split( /\_\d+\.root/ , $file );
-    print "$dataset\n";
-
-    $listfilename="$dataset.txt";
-    #print "$listfilename\n";
-
-    system "rm -f $outputDir/$listfilename";
-
-}
-
-#second loop to create the new files
-for $file(@inputList)
-{
-    chomp($file);
-    print "$file\n";
 
     ## split each line
     my ($dataset) = split( /\_\d+\.root/ , $file );
@@ -65,19 +53,67 @@ for $file(@inputList)
     $listfilename="$dataset.txt";
     #print "$listfilename\n";
 
-    system "touch $outputDir/$listfilename";
+    system "rm -f $outputDir/$listfilename";
 
-    open(LISTFILENAME,">>$outputDir/$listfilename");
+}
+
+
+#second loop to create the new files
+for $file(@inputList)
+{
+    chomp($file);
+    #print "$file\n";
+
+    ## split each line
+    my ($dataset) = split( /\_\d+\.root/ , $file );
+    #print "$dataset\n";
+
+    $listfilename="$outputDir/$dataset.txt";
+    #print "$listfilename\n";
+
+    system "touch $listfilename";
+
+    my $IsPresent=0;
+    for $line(@AllLists)
+    {
+	if($IsPresent==0)
+	{
+	    if($listfilename eq $line)
+	    {
+		$IsPresent=1;
+	    }
+	}
+    }
+
+    if($IsPresent==0)
+    {
+	print "$listfilename\n";
+	push @AllLists, $listfilename;
+    }
+
+    open(LISTFILENAME,">>$listfilename");
     print LISTFILENAME "$file\n";
     close(LISTFILENAME);
 }
 
 
+open(LISTALLFILENAME,">$AllListsFilename");
+for $txtfile(@AllLists)
+{
+    chomp($txtfile);
+    print LISTALLFILENAME "$txtfile\n";
+}
+close(LISTALLFILENAME);
+
+print "List created: $AllListsFilename\n";
+
+#print "@AllLists\n";
+
 #---------------------------------------------------------#
 
 sub help(){
     print "Usage: ./createList.pl -d <inputDir> -m <match> -o <outputDir> [-h <help?>] \n";
-    print "Example: ./createList.pl -d /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/output/ -m root -o ../config/ \n";
+    print "Example: ./createList.pl -d /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/output -m root -o /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config \n";
     print "Options:\n";
     print "-d <inputDir>:       choose the input directory containing the files\n";
     print "-m <match>:          choose the parameter MATCH, will be used to select only the files whose filename matches with the string MATCH\n";
