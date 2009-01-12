@@ -48,6 +48,7 @@ def AddHisto(inputHistoName, outputHisto, inputRootFileName, currentWeight,
     return
 
 #---Option Parser
+#--- TODO: WHY PARSER DOES NOT WORK IN CMSSW ENVIRONMENT? ---#
 usage = "usage: %prog [options] \nExample: \n./combinePlotsTemplate.py -i /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config/inputListAllCurrent.txt -c analysisClass_genStudies -d /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output -l 100 -x /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/xsection_pb_default.txt -o /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output"
 
 parser = OptionParser(usage=usage)
@@ -165,11 +166,11 @@ for n, lin in enumerate( open( options.inputList ) ):
                     #print data[row][ column[i] ] 
 
     # example
-    #Ntot = int(data[1]['N'])
+    #Ntot = int(data[0]['N'])
     #print Ntot
 
     #---Calculate weight
-    Ntot = int(data[1]['N'])
+    Ntot = int(data[0]['N'])
     weight = float(xsection_val) * float(options.intLumi) / Ntot 
     print "weight: " + str(weight)
 
@@ -293,6 +294,6 @@ c1_8.SetLogy();
 h_LQmassAlgo2_With3Jets_LQstack.Draw()
 c1.Update()
 
-c1.SaveAs("Histo.root")
+c1.SaveAs("combinePlotsTemplate.root")
 
 
