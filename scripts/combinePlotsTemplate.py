@@ -17,28 +17,34 @@ c1 = TCanvas('c1','Example',200,10,600,400)
 c1.SetFillColor(kWhite)
 
 #--- Declare histograms
-h_LQmassAlgo2_With3Jets_LQ = TH1F() 
-h_LQmassAlgo_With2Jets_LQ = TH1F() 
+h_LQmassAlgo2_With3Jets_LQ = TH1F()
+h_LQmassAlgo_With2Jets_LQ = TH1F()
 
-h_LQmassAlgo2_With3Jets_LQ250 = TH1F() 
-h_LQmassAlgo_With2Jets_LQ250 = TH1F() 
+h_LQmassAlgo2_With3Jets_LQ250 = TH1F()
+h_LQmassAlgo_With2Jets_LQ250 = TH1F()
 
-h_LQmassAlgo2_With3Jets_LQ400 = TH1F() 
+h_LQmassAlgo2_With3Jets_LQ400 = TH1F()
 h_LQmassAlgo_With2Jets_LQ400 = TH1F() 
 
 #---# #---# #---#
 
 #--- functions
-def AddHisto(inputHistoName, outputHisto, inputRootFileName, currentWeight, currentColor):
+def AddHisto(inputHistoName, outputHisto, inputRootFileName, currentWeight,
+             rebin=int(1), currentColor=int(1), currentFillStyle=int(1001), currentMarker=int(1)):
     file = TFile(inputRootFile);
     #file.ls()
     htemp = file.Get(inputHistoName)
+    htemp.Rebin(rebin)
     if( outputHisto.GetNbinsX() != htemp.GetNbinsX() ):
         outputHisto.SetStats(1)
         outputHisto.SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax())
     outputHisto.Add(htemp, currentWeight)
-    file.Close()
     outputHisto.SetFillColor(currentColor)
+    outputHisto.SetFillStyle(currentFillStyle)
+    outputHisto.SetMarkerStyle(currentMarker)
+    outputHisto.SetMarkerColor(currentColor)
+
+    file.Close()
     return
 
 #---Option Parser
@@ -63,7 +69,7 @@ parser.add_option("-l", "--intLumi", dest="intLumi",
                   metavar="INTLUMI")
 
 parser.add_option("-x", "--xsection", dest="xsection",
-                  help="the file XSEC contains the cross sections for all the datasets (full path required)",
+                  help="the file XSEC contains the cross sections (in pb) for all the datasets (full path required)",
                   metavar="XSEC")
 
 parser.add_option("-o", "--outputDir", dest="outputDir",
@@ -71,6 +77,11 @@ parser.add_option("-o", "--outputDir", dest="outputDir",
                   metavar="OUTDIR")
 
 (options, args) = parser.parse_args()
+
+if len(sys.argv)<12:
+    print "ERROR: not enough arguments --> ./combinePlotsTemplate.py -h or ./combinePlotsTemplate.py --help for options"
+    sys.exit()
+
 
 if len(sys.argv)<2:
     print "./combinePlotsTemplate.py -h or ./combinePlotsTemplate.py --help for options"
@@ -163,35 +174,61 @@ for n, lin in enumerate( open( options.inputList ) ):
     print "weight: " + str(weight)
 
     #---Combine histograms using PYROOT
+
+    #--- TODO: IMPROVE DRAW OPTIONS (MARKERS, LINE STYLE)---#
+    #--- TODO: EXAMPLE WITH SEVERAL DATASETS ---#
+
     #AddHisto(inputHistoName, outputHisto, inputRootFileName, datasetIdx, currentWeight):
 
 
-    #--- TODO: IMPROVE DRAW OPTIONS (COLORS, MARKERS, LINE STYLE)---#
-    #--- TODO: IMPROVE REBINNING OPTIONS ---#
-    #--- TODO: EXAMPLE WITH SEVERAL DATASETS ---#
-
+    #-legend
+    #color = int(1) #black
+    #color = int(2) #red
+    #color = int(3) #green
+    #fillstyle = int(0) #hollow
+    #fillstyle = int(3002) #dots
+    #fillstyle = int(3004) #lines
+    #marker = int(20) #circle solid
+    #marker = int(24) #circle empty
+    #marker = int(21) #square solid
+    #marker = int(25) #square empty
+    #marker = int(22) #trinagle solid
+    #marker = int(26) #triangle empty
+    
     #LQtoUE
     name = "LQtoUE"
+    rebin = int (10)
     color = int(1) #black
+    fillstyle = int(1001) #solid
+    marker = int(20) #circle solid
+    
     if( re.search(name, dataset_mod) ):
-        AddHisto("h_LQmassAlgo_With2Jets", h_LQmassAlgo_With2Jets_LQ, inputRootFile, weight, color)
-        AddHisto("h_LQmassAlgo2_With3Jets", h_LQmassAlgo2_With3Jets_LQ, inputRootFile, weight, color)
+        AddHisto("h_LQmassAlgo_With2Jets", h_LQmassAlgo_With2Jets_LQ, inputRootFile, weight, rebin, color, fillstyle, marker)
+        AddHisto("h_LQmassAlgo2_With3Jets", h_LQmassAlgo2_With3Jets_LQ, inputRootFile, weight, rebin, color, fillstyle, marker)
 
 
     #LQtoUE_M250
     name = "LQtoUE_M250"
+    rebin = int (10)
     color = int(2) #red
+    fillstyle = int(1001) #solid
+    marker = int(25) #square empty
+
     if( re.search(name, dataset_mod) ):
-        AddHisto("h_LQmassAlgo_With2Jets", h_LQmassAlgo_With2Jets_LQ250, inputRootFile, weight, color)
-        AddHisto("h_LQmassAlgo2_With3Jets", h_LQmassAlgo2_With3Jets_LQ250, inputRootFile, weight, color)
+        AddHisto("h_LQmassAlgo_With2Jets", h_LQmassAlgo_With2Jets_LQ250, inputRootFile, weight, rebin, color, fillstyle, marker)
+        AddHisto("h_LQmassAlgo2_With3Jets", h_LQmassAlgo2_With3Jets_LQ250, inputRootFile, weight, rebin, color, fillstyle, marker)
 
 
     #LQtoUE_M400
     name = "LQtoUE_M400"
+    rebin = int (10)
     color = int(3) #green
+    fillstyle = int(3004) #lines
+    marker = int(26) #triangle empty
+
     if( re.search(name, dataset_mod) ):
-        AddHisto("h_LQmassAlgo_With2Jets", h_LQmassAlgo_With2Jets_LQ400, inputRootFile, weight, color)
-        AddHisto("h_LQmassAlgo2_With3Jets", h_LQmassAlgo2_With3Jets_LQ400, inputRootFile, weight, color)
+        AddHisto("h_LQmassAlgo_With2Jets", h_LQmassAlgo_With2Jets_LQ400, inputRootFile, weight, rebin, color, fillstyle, marker)
+        AddHisto("h_LQmassAlgo2_With3Jets", h_LQmassAlgo2_With3Jets_LQ400, inputRootFile, weight, rebin, color, fillstyle, marker)
 
 
     #---End of the loop over datasets---#
