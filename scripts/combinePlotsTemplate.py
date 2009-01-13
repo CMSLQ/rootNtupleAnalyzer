@@ -181,7 +181,6 @@ for n, lin in enumerate( open( options.inputList ) ):
 
     #AddHisto(inputHistoName, outputHisto, inputRootFileName, datasetIdx, currentWeight):
 
-
     #-legend
     #color = int(1) #black
     #color = int(2) #red
@@ -207,7 +206,6 @@ for n, lin in enumerate( open( options.inputList ) ):
         AddHisto("h_LQmassAlgo_With2Jets", h_LQmassAlgo_With2Jets_LQ, inputRootFile, weight, rebin, color, fillstyle, marker)
         AddHisto("h_LQmassAlgo2_With3Jets", h_LQmassAlgo2_With3Jets_LQ, inputRootFile, weight, rebin, color, fillstyle, marker)
 
-
     #LQtoUE_M250
     name = "LQtoUE_M250"
     rebin = int (10)
@@ -218,7 +216,6 @@ for n, lin in enumerate( open( options.inputList ) ):
     if( re.search(name, dataset_mod) ):
         AddHisto("h_LQmassAlgo_With2Jets", h_LQmassAlgo_With2Jets_LQ250, inputRootFile, weight, rebin, color, fillstyle, marker)
         AddHisto("h_LQmassAlgo2_With3Jets", h_LQmassAlgo2_With3Jets_LQ250, inputRootFile, weight, rebin, color, fillstyle, marker)
-
 
     #LQtoUE_M400
     name = "LQtoUE_M400"

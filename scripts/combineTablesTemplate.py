@@ -8,6 +8,11 @@ import os.path
 from ROOT import *
 import re
 
+#---Declare efficiency tables
+table_LQtoUE_M250 = {}
+table_LQtoUE_M400 = {}
+table_LQtoUE = {}
+
 #---# #---# #---#
 
 #---Option Parser
@@ -51,6 +56,116 @@ if len(sys.argv)<2:
     sys.exit()
 
 #print options.analysisCode
+
+
+
+
+#--- Functions
+
+#def AddHisto(inputHistoName, outputHisto, inputRootFileName, currentWeight,
+#             rebin=int(1), currentColor=int(1), currentFillStyle=int(1001), currentMarker=int(1)):
+
+def UpdateTable(inputTable, outputTable):
+    if(n == 0):
+        for j,line in enumerate( inputTable ):
+            outputTable[int(j)]={'name': inputTable[j]['name'],
+                                 'min': inputTable[j]['min'],
+                                 'max': inputTable[j]['max'],
+                                 'N':       float(inputTable[j]['N']),
+                                 'errN':    pow( float(inputTable[j]['errN']), 2 ),
+                                 'Npass':       float(inputTable[j]['Npass']),
+                                 'errNpass':    pow( float(inputTable[j]['errNpass']), 2 ),
+                                 'EffRel':      float(0),
+                                 'errEffRel':   float(0),
+                                 'EffAbs':      float(0),
+                                 'errEffAbs':   float(0),
+                                 }
+    else:
+        for j,line in enumerate( inputTable ):
+            outputTable[int(j)]={'name': inputTable[j]['name'],
+                                 'min':  inputTable[j]['min'],
+                                 'max':  inputTable[j]['max'],
+                                 'N':       float(outputTable[int(j)]['N']) + float(inputTable[j]['N']),
+                                 'errN':    float(outputTable[int(j)]['errN']) + pow( float(inputTable[j]['errN']), 2 ),
+                                 'Npass':       float(outputTable[int(j)]['Npass']) + float(inputTable[j]['Npass']),
+                                 'errNpass':    float(outputTable[int(j)]['errNpass']) + pow( float(inputTable[j]['errNpass']), 2 ),
+                                 'EffRel':      float(0),
+                                 'errEffRel':   float(0),
+                                 'EffAbs':      float(0),
+                                 'errEffAbs':   float(0),
+                                 }
+    return
+            
+
+def CalculateEfficiency(table):
+    for j,line in enumerate( table ):
+        if( j == 0):
+            table[int(j)] = {'name':       table[int(j)]['name'],
+                             'min':        table[int(j)]['min'],
+                             'max':        table[int(j)]['max'],
+                             'N':          float(table[j]['N']) ,
+                             'errN':       int(0), 
+                             'Npass':      float(table[j]['Npass']) ,
+                             'errNpass':   int(0), 
+                             'EffRel':     int(1),
+                             'errEffRel':  int(0),
+                             'EffAbs':     int(1),
+                             'errEffAbs':  int(0),
+                             }
+        else:
+            N = float(table[j]['N']) 
+            errN = sqrt(float(table[j]["errN"])) 
+            errRelN = errN / N 
+
+            Npass = float(table[j]['Npass']) 
+            errNpass = sqrt(float(table[j]["errNpass"]))
+            errRelNpass = errNpass / Npass 
+
+            EffRel = Npass / N
+            errRelEffRel = sqrt( errRelNpass*errRelNpass + errRelN*errRelN )
+            errEffRel = errRelEffRel * EffRel
+            
+            EffAbs = Npass / float(table[0]['N'])
+            errEffAbs = errNpass / float(table[0]['N'])
+            
+            table[int(j)]={'name': table[int(j)]['name'],
+                           'min': table[int(j)]['min'],
+                           'max': table[int(j)]['max'],
+                           'N':       N,
+                           'errN':    errN, 
+                           'Npass':       Npass,
+                           'errNpass':    errNpass, 
+                           'EffRel':      EffRel,
+                           'errEffRel':   errEffRel,
+                           'EffAbs':      EffAbs,
+                           'errEffAbs':   errEffAbs,
+                           }
+            #print table[j]
+    return
+
+def PrintTableOnScreen(table, name):
+    print "\n"
+    print name
+    print "name".rjust(10),
+    print "min".rjust(10),
+    print "max".rjust(10),
+    print "Npass".rjust(10),
+    print "errNpass".rjust(10),
+    print "EffRel".rjust(10),
+    print "errEffRel".rjust(10),
+    print "EffAbs".rjust(10),
+    print "errEffAbs".rjust(10)
+
+    for j, line in enumerate(table):
+        print table[j]['name'].rjust(10),
+        print table[j]['min'].rjust(10),
+        print table[j]['max'].rjust(10),
+        print ("%.01f" % table[j]['Npass']).rjust(10),
+        print ("%.01f" % table[j]['errNpass']).rjust(10),
+        print ("%.02f" % table[j]['EffRel']).rjust(10),
+        print ("%.02f" % table[j]['errEffRel']).rjust(10),
+        print ("%.02f" % table[j]['EffAbs']).rjust(10),
+        print ("%.02f" % table[j]['errEffAbs']).rjust(10)
 
 #---Loop over datasets
 print "\n"
@@ -149,11 +264,8 @@ for n, lin in enumerate( open( options.inputList ) ):
                               'errN': int(0),
                               'Npass': "%.01f" % ( Ntot * weight ),
                               'errNpass': int(0),
-                              'EffRel': int(100),
-                              'errEffRel': int(0),
-                              'EffAbs': int(100),
-                              'errEffAbs': int(0),
                               }
+
         else:
             N = ( float(data[j]['N']) * weight )
             errN = ( float(data[j-1]["errEffAbs"]) * xsection_X_intLumi )
@@ -163,13 +275,6 @@ for n, lin in enumerate( open( options.inputList ) ):
             errNpass = ( float(data[j]["errEffAbs"]) * xsection_X_intLumi )
             errRelNpass = errNpass / Npass 
             
-            EffRel = Npass / N
-            errRelEffRel = sqrt( errRelNpass*errRelNpass + errRelN*errRelN )
-            errEffRel = errRelEffRel * EffRel
-            
-            EffAbs = Npass / float(newtable[0]['N'])
-            errEffAbs = errNpass / float(newtable[0]['N'])
-            
             newtable[int(j)]={'name': data[j]['name'],
                               'min': data[j]['min'],
                               'max': data[j]['max'],
@@ -177,21 +282,25 @@ for n, lin in enumerate( open( options.inputList ) ):
                               'errN':        "%.01f" % errN,
                               'Npass':       "%.01f" % Npass,
                               'errNpass':    "%.01f" % errNpass,
-                              'EffRel':      "%.03f" % EffRel,
-                              'errEffRel':   "%.03f" % errEffRel,
-                              'EffAbs':      "%.03f" % EffAbs,
-                              'errEffAbs':   "%.03f" % errEffAbs,
                               }
+
             
-        for j,line in enumerate( newtable ):
-            print newtable[j]
+    #---# #---# #---#
 
-        #---# #---# #---#
+    #---Combine tables from different datasets
 
-        #--- TODO: COMBINE THE TABLES FROM DIFFERENT DATASETS ---#
-
+    #LQtoUE
+    name = "LQtoUE"
+    if( re.search(name, dataset_mod) ):
+        UpdateTable(newtable, table_LQtoUE)
                 
     #---End of the loop over datasets---#
 
 #--- Create final tables 
+CalculateEfficiency(table_LQtoUE)
+        
+#---Print table on screen
+PrintTableOnScreen(table_LQtoUE, "#--- All LQtoUE ---#")
+
+#--- TODO CREATE LATEX TABLE (PYTEX?) ---#
 
