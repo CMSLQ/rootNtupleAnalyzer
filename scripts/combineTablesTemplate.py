@@ -9,9 +9,9 @@ from ROOT import *
 import re
 
 #---Declare efficiency tables
+table_LQtoUE = {}
 table_LQtoUE_M250 = {}
 table_LQtoUE_M400 = {}
-table_LQtoUE = {}
 
 #---# #---# #---#
 
@@ -66,7 +66,7 @@ if len(sys.argv)<2:
 #             rebin=int(1), currentColor=int(1), currentFillStyle=int(1001), currentMarker=int(1)):
 
 def UpdateTable(inputTable, outputTable):
-    if(n == 0):
+    if not outputTable:
         for j,line in enumerate( inputTable ):
             outputTable[int(j)]={'name': inputTable[j]['name'],
                                  'min': inputTable[j]['min'],
@@ -296,14 +296,28 @@ for n, lin in enumerate( open( options.inputList ) ):
     name = "LQtoUE"
     if( re.search(name, dataset_mod) ):
         UpdateTable(newtable, table_LQtoUE)
+
+    name = "LQtoUE_M250"
+    if( re.search(name, dataset_mod) ):
+        UpdateTable(newtable, table_LQtoUE_M250)
+
+    name = "LQtoUE_M400"
+    if( re.search(name, dataset_mod) ):
+        UpdateTable(newtable, table_LQtoUE_M400)
+
+#--- TODO: FIND BUG WITH 400 ---#
                 
     #---End of the loop over datasets---#
 
 #--- Create final tables 
 CalculateEfficiency(table_LQtoUE)
+CalculateEfficiency(table_LQtoUE_M250)
+CalculateEfficiency(table_LQtoUE_M400)
         
 #---Print table on screen
 PrintTableOnScreen(table_LQtoUE, "#--- All LQtoUE ---#")
+PrintTableOnScreen(table_LQtoUE_M250, "#--- LQtoUE M=250 GeV---#")
+PrintTableOnScreen(table_LQtoUE_M400, "#--- LQtoUE M=400 GeV---#")
 
 #--- TODO CREATE LATEX TABLE (PYTEX?) ---#
 
