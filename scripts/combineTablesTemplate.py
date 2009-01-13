@@ -143,6 +143,7 @@ def CalculateEfficiency(table):
             #print table[j]
     return
 
+
 def PrintTableOnScreen(table, name):
     print "\n"
     print name
@@ -166,6 +167,8 @@ def PrintTableOnScreen(table, name):
         print ("%.02f" % table[j]['errEffRel']).rjust(10),
         print ("%.02f" % table[j]['EffAbs']).rjust(10),
         print ("%.02f" % table[j]['errEffAbs']).rjust(10)
+
+    return
 
 #---Loop over datasets
 print "\n"
