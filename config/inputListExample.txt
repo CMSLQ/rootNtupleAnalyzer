@@ -1,3 +1,0 @@
-#### list of root files, including path, to be analyzed in chain
-data/input/LQ1stgenM400_full167_100pbScenario.root
-#data/input/LQ1stgenM1000_full167_100pbScenario.root
