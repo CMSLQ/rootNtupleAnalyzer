@@ -13,6 +13,7 @@ table_LQtoUE = {}
 table_LQtoUE_M250 = {}
 table_LQtoUE_M400 = {}
 
+#--- TODO: MAKE CLEAR WHICH REGIONS CAN BE TOUCHED AND WHICH NOT ---#
 #---# #---# #---#
 
 #---Option Parser
@@ -69,8 +70,10 @@ def UpdateTable(inputTable, outputTable):
     if not outputTable:
         for j,line in enumerate( inputTable ):
             outputTable[int(j)]={'name': inputTable[j]['name'],
-                                 'min': inputTable[j]['min'],
-                                 'max': inputTable[j]['max'],
+                                 'min1': inputTable[j]['min1'],
+                                 'max1': inputTable[j]['max1'],
+                                 'min2': inputTable[j]['min2'],
+                                 'max2': inputTable[j]['max2'],
                                  'N':       float(inputTable[j]['N']),
                                  'errN':    pow( float(inputTable[j]['errN']), 2 ),
                                  'Npass':       float(inputTable[j]['Npass']),
@@ -83,8 +86,10 @@ def UpdateTable(inputTable, outputTable):
     else:
         for j,line in enumerate( inputTable ):
             outputTable[int(j)]={'name': inputTable[j]['name'],
-                                 'min':  inputTable[j]['min'],
-                                 'max':  inputTable[j]['max'],
+                                 'min1': inputTable[j]['min1'],
+                                 'max1': inputTable[j]['max1'],
+                                 'min2': inputTable[j]['min2'],
+                                 'max2': inputTable[j]['max2'],
                                  'N':       float(outputTable[int(j)]['N']) + float(inputTable[j]['N']),
                                  'errN':    float(outputTable[int(j)]['errN']) + pow( float(inputTable[j]['errN']), 2 ),
                                  'Npass':       float(outputTable[int(j)]['Npass']) + float(inputTable[j]['Npass']),
@@ -101,8 +106,10 @@ def CalculateEfficiency(table):
     for j,line in enumerate( table ):
         if( j == 0):
             table[int(j)] = {'name':       table[int(j)]['name'],
-                             'min':        table[int(j)]['min'],
-                             'max':        table[int(j)]['max'],
+                             'min1':        table[int(j)]['min1'],
+                             'max1':        table[int(j)]['max1'],
+                             'min2':        table[int(j)]['min2'],
+                             'max2':        table[int(j)]['max2'],
                              'N':          float(table[j]['N']) ,
                              'errN':       int(0), 
                              'Npass':      float(table[j]['Npass']) ,
@@ -129,8 +136,10 @@ def CalculateEfficiency(table):
             errEffAbs = errNpass / float(table[0]['N'])
             
             table[int(j)]={'name': table[int(j)]['name'],
-                           'min': table[int(j)]['min'],
-                           'max': table[int(j)]['max'],
+                           'min1': table[int(j)]['min1'],
+                           'max1': table[int(j)]['max1'],
+                           'min2': table[int(j)]['min2'],
+                           'max2': table[int(j)]['max2'],
                            'N':       N,
                            'errN':    errN, 
                            'Npass':       Npass,
@@ -147,8 +156,10 @@ def CalculateEfficiency(table):
 def WriteTable(table, name, file):
     print >>file, name
     print >>file, "name".rjust(10),
-    print >>file, "min".rjust(10),
-    print >>file, "max".rjust(10),
+    print >>file, "min1".rjust(10),
+    print >>file, "max1".rjust(10),
+    print >>file, "min2".rjust(10),
+    print >>file, "max2".rjust(10),
     print >>file, "Npass".rjust(10),
     print >>file, "errNpass".rjust(10),
     print >>file, "EffRel".rjust(10),
@@ -158,8 +169,10 @@ def WriteTable(table, name, file):
 
     for j, line in enumerate(table):
         print >>file, table[j]['name'].rjust(10),
-        print >>file, table[j]['min'].rjust(10),
-        print >>file, table[j]['max'].rjust(10),
+        print >>file, table[j]['min1'].rjust(10),
+        print >>file, table[j]['max1'].rjust(10),
+        print >>file, table[j]['min2'].rjust(10),
+        print >>file, table[j]['max2'].rjust(10),
         print >>file, ("%.01f" % table[j]['Npass']).rjust(10),
         print >>file, ("%.01f" % table[j]['errNpass']).rjust(10),
         print >>file, ("%.02f" % table[j]['EffRel']).rjust(10),
@@ -174,8 +187,10 @@ def WriteTable(table, name, file):
     print "\n"
     print name
     print "name".rjust(10),
-    print "min".rjust(10),
-    print "max".rjust(10),
+    print "min1".rjust(10),
+    print "max1".rjust(10),
+    print "min2".rjust(10),
+    print "max2".rjust(10),
     print "Npass".rjust(10),
     print "errNpass".rjust(10),
     print "EffRel".rjust(10),
@@ -185,8 +200,10 @@ def WriteTable(table, name, file):
 
     for j, line in enumerate(table):
         print table[j]['name'].rjust(10),
-        print table[j]['min'].rjust(10),
-        print table[j]['max'].rjust(10),
+        print table[j]['min1'].rjust(10),
+        print table[j]['max1'].rjust(10),
+        print table[j]['min2'].rjust(10),
+        print table[j]['max2'].rjust(10),
         print ("%.01f" % table[j]['Npass']).rjust(10),
         print ("%.01f" % table[j]['errNpass']).rjust(10),
         print ("%.02f" % table[j]['EffRel']).rjust(10),
@@ -287,8 +304,10 @@ for n, lin in enumerate( open( options.inputList ) ):
     for j,line in enumerate( data ):
         if(j == 0):
             newtable[int(j)]={'name': data[j]['name'],
-                              'min': "-",
-                              'max': "-",
+                              'min1': "-",
+                              'max1': "-",
+                              'min2': "-",
+                              'max2': "-",
                               'N': "%.01f" % ( Ntot * weight ),
                               'errN': int(0),
                               'Npass': "%.01f" % ( Ntot * weight ),
@@ -305,8 +324,10 @@ for n, lin in enumerate( open( options.inputList ) ):
             errRelNpass = errNpass / Npass 
             
             newtable[int(j)]={'name': data[j]['name'],
-                              'min': data[j]['min'],
-                              'max': data[j]['max'],
+                              'min1': data[j]['min1'],
+                              'max1': data[j]['max1'],
+                              'min2': data[j]['min2'],
+                              'max2': data[j]['max2'],
                               'N':           "%.01f" % N,
                               'errN':        "%.01f" % errN,
                               'Npass':       "%.01f" % Npass,
