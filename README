@@ -76,4 +76,13 @@ Note2:
 Additional scripts:
 
   script/createList.pl: it creates a .txt list of .root input files to be used as input for the analysis
-  script/launchAnalysis.pl: it launches the analysis jobs for all the lists created by "script/createList.pl"
+  script/launchAnalysis.pl: it launches the analysis jobs for all the lists created by "script/createList.pl";  the output are two files .root and .dat with plots and tables respectively
+  script scripts/combinePlotsTemplate.py: tamplate to combine the histograms from the output of "script/launchAnalysis.pl", using the file of the dataset cross section (see example below, xsections in pb) to rescale the entries
+
+   /Exotica_LQtoUE_M250/Summer08_IDEAL_V9_v1/GEN-SIM-RECO 5.82
+   /Exotica_LQtoUE_M400/Summer08_IDEAL_V9_v1/GEN-SIM-RECO 0.432
+   /TTJets-madgraph/Summer08_IDEAL_V9_v2/GEN-SIM-RECO 317
+   /ZJets-madgraph/Summer08_IDEAL_V9_v1/GEN-SIM-RECO 3700
+   /WJets-madgraph/Summer08_IDEAL_V9_v1/GEN-SIM-RECO 40000
+   /QCDDiJetPt15to20/Summer08_IDEAL_V9_v2/GEN-SIM-RECO 949441000
+   ...
