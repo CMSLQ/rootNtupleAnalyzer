@@ -8,8 +8,8 @@
 #include <TVector2.h>
 #include <TVector3.h>
 
-analysisClass::analysisClass(string * inputList, string * treeName, TString * outputFileName)
-  :baseClass(inputList, treeName, outputFileName)
+analysisClass::analysisClass(string * inputList, string * cutFile, string * treeName, TString * outputFileName, string * cutEfficFile)
+  :baseClass(inputList, cutFile, treeName, outputFileName, cutEfficFile)
 {
   std::cout << "analysisClass::analysisClass(): begins " << std::endl;
 
@@ -31,6 +31,18 @@ void analysisClass::Loop()
    
    //////////book histos here
 
+#ifdef USE_EXAMPLE   
+   // number of electrons
+   TH1F *h_nEleFinal = new TH1F ("h_nEleFinal","",11,-0.5,10.5);
+   h_nEleFinal->Sumw2();
+   //pT 1st ele
+   TH1F *h_pT1stEle = new TH1F ("h_pT1stEle","",100,0,1000);
+   h_pT1stEle->Sumw2();
+   //pT 2nd ele
+   TH1F *h_pT2ndEle = new TH1F ("h_pT2ndEle","",100,0,1000);
+   h_pT2ndEle->Sumw2();
+#endif //end of USE_EXAMPLE
+
    /////////initialize variables
 
    Long64_t nentries = fChain->GetEntriesFast();
@@ -51,11 +63,94 @@ void analysisClass::Loop()
 
      ///Stuff to be done every event
 
+#ifdef USE_EXAMPLE
+     // Electrons
+     vector<int> v_idx_ele_final;
+     for(int iele=0;iele<eleCount;iele++)
+       {
+	 // ECAL barrel fiducial region
+	 bool pass_ECAL_FR=false;
+	 if( fabs(eleEta[iele]) < 1.4 )	v_idx_ele_final.push_back(iele);
+       }     
+
+     // Set the evaluation of the cuts to false and clear the map variableName_value_
+     if( !resetCuts() ) 
+       {
+	 STDOUT("ERROR: resetCuts() did not complete successfully. Returning.");
+	 return;
+       }
+
+     // Set the value of the variableNames listed in the cutFile to their current value
+     //variableName_value_["nEleFinal"] = v_idx_ele_final.size();
+     if ( !fillVariableWithValue("nEleFinal", v_idx_ele_final.size()) )
+       {
+	 STDOUT("ERROR: fillVariableWithValue() did not complete successfully. Returning.");
+	 return;
+       }
+     if( v_idx_ele_final.size() >= 1 ) 
+       {
+	 //variableName_value_["pT1stEle"] = elePt[v_idx_ele_final[0]];
+	 if ( !fillVariableWithValue( "pT1stEle", elePt[v_idx_ele_final[0]] ) )
+	   {
+	     STDOUT("ERROR: fillVariableWithValue() did not complete successfully. Returning.");
+	     return;
+	   }	
+       }
+     if( v_idx_ele_final.size() >= 2 ) 
+       {
+	 //variableName_value_["pT2ndEle"] = elePt[v_idx_ele_final[1]];
+	 if ( !fillVariableWithValue( "pT2ndEle", elePt[v_idx_ele_final[1]]) )
+	   {
+	     STDOUT("ERROR: fillVariableWithValue() did not complete successfully. Returning.");
+	     return;
+	   }	
+       }
+
+     //for (map<string, double>::iterator it = variableName_value_.begin(); it != variableName_value_.end(); it++) STDOUT("variableName_value_ = "<<it->first<<", "<<it->second)
+
+     // Evaluate cuts (but do not apply them)
+     if( !evaluateCuts() )
+       {
+	 STDOUT("ERROR: evaluateCuts did not complete successfully. Returning.");
+	 return;
+       }
+
+     // Fill histograms and do analysis based on cut evaluation
+     h_nEleFinal->Fill(v_idx_ele_final.size());
+     if( v_idx_ele_final.size()>=1 ) h_pT1stEle->Fill(elePt[v_idx_ele_final[0]]);
+     if( v_idx_ele_final.size()>=2 && (elePt[v_idx_ele_final[0]])>85 ) h_pT2ndEle->Fill(elePt[v_idx_ele_final[1]]);
+     //     if( v_idx_ele_final.size()>=2 && (elePt[v_idx_ele_final[0]])>85 && (elePt[v_idx_ele_final[1]])>30) h_pT2ndEle->Fill(elePt[v_idx_ele_final[1]]);
+
+
+     //     if( passedCut("pT1stEle") ) h_pT1stEle->Fill(elePt[v_idx_ele_final[0]]);
+     //     if( passedCut("pT2ndEle") ) h_pT2ndEle->Fill(elePt[v_idx_ele_final[1]]);
+     
+     // reject events that did not pass level 0 cuts
+     if( !passedCut("0") ) continue;
+     // ......
+     
+     // reject events that did not pass level 1 cuts
+     if( !passedCut("1") ) continue;
+     // ......
+
+     // reject events that did not pass the full cut list
+     if( !passedCut("all") ) continue;
+     // ......
+
+#endif  // end of USE_EXAMPLE
+
 
      ////////////////////// User's code ends here ///////////////////////
-   }
+
+   } // End loop over events
 
    //////////write histos 
+
+#ifdef USE_EXAMPLE
+   h_nEleFinal->Write();
+   h_pT1stEle->Write();
+   h_pT2ndEle->Write();
+#endif // end of USE_EXAMPLE
 
    std::cout << "analysisClass::Loop() ends" <<std::endl;   
 }
