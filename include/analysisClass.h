@@ -13,7 +13,7 @@ using namespace std;
 
 class analysisClass : public baseClass {
 public :
-  analysisClass(string * inputList, string * treeName,  TString *outputFileName=0 );
+  analysisClass(string * inputList, string * cutFile, string * treeName,  TString *outputFileName=0, string * cutEfficFile=0);
   virtual ~analysisClass();
   void Loop();
 };

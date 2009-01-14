@@ -1,4 +1,6 @@
 COMP=c++ 
+FLAGS = 
+FLAGS += -DUSE_EXAMPLE 
 ROOTLIBS = `root-config --glibs --cflags` -lMinuit 
 INC= -I.. -I. -I./include  -I${CLHEP}/include 
 ROOTINC= -I${ROOTSYS}/include
@@ -15,7 +17,7 @@ EXE = main
 all: ${EXE}
 
 main: $(SRC)/main.o $(SELECTIONLIB)
-	$(COMP) $(INC) $(ROOTINC) $(LIBS) -o $@  $(SELECTIONLIB) $(SRC)/$@.o
+	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(SRC)/$@.o
 
 clean:
 	rm -f src/*.o *.lo core core.*
@@ -23,15 +25,15 @@ clean:
 	rm -f *.exe
 	rm -f $(EXE)
 .cpp.o:
-	$(COMP) -c $(INC) $(ROOTINC) -o $@ $<
+	$(COMP) -c $(INC) $(ROOTINC) $(FLAGS) -o $@ $<
 
 .cc.o:
-	$(COMP) -m32 -c $(INC) $(ROOTINC) -o $@ $<
+	$(COMP) -m32 -c $(INC) $(ROOTINC) $(FLAGS) -o $@ $<
 
 .cxx.o:
-	$(COMP) -c $(INC) $(ROOTINC) -o $@ $<
+	$(COMP) -c $(INC) $(ROOTINC) $(FLAGS) -o $@ $<
 
 .C.o:
-	$(COMP) -c $(INC) $(ROOTINC) -o $@ $<
+	$(COMP) -c $(INC) $(ROOTINC) $(FLAGS) -o $@ $<
 
 

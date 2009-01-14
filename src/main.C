@@ -23,21 +23,23 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-  const int Nparam=3;   // NUMBER OF PARAMETERS
+  const int Nparam=5;   // NUMBER OF PARAMETERS
 
   if(argc!=Nparam+1)
     {
       cout << "main() : arcg = " << argc << " is different from " << Nparam+1 <<". Exiting." <<endl;
-      cout << "Usage  : ./main inputList treeName outputFileNameWithoutExtension " << endl;
-      cout << "Example: ./main config/inputListExample.txt RootNtupleMaker data/output/test " << endl;
+      cout << "Usage  : ./main inputList cutFile treeName outputRootFileWithoutExtension outputEfficiencyFileWithoutExtension" << endl;
+      cout << "Example: ./main config/inputListExample.txt config/cutFileExample.txt RootNtupleMaker data/output/rootFile data/output/cutEfficiencyFile" << endl;
       exit (1);
     };
 
-  string * inputList = new string(argv[1]);
-  string * treeName = new string(argv[2]);
-  TString * outputFileName= new TString(argv[3]);
+  string * inputList      = new  string(argv[1]);
+  string * cutFile        = new  string(argv[2]);
+  string * treeName       = new  string(argv[3]);
+  TString * outputFileName= new TString(argv[4]);
+  string * cutEfficFile   = new  string(argv[5]);
 
-  analysisClass analysisClass_(inputList, treeName, outputFileName);
+  analysisClass analysisClass_(inputList, cutFile, treeName, outputFileName, cutEfficFile);
   analysisClass_.Loop();
 
 }
