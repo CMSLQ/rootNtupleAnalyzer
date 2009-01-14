@@ -9,16 +9,19 @@ from ROOT import *
 import re
 
 #---Declare efficiency tables
-table_LQtoUE = {}
 table_LQtoUE_M250 = {}
 table_LQtoUE_M400 = {}
+table_QCD = {}
+table_TTBAR = {}
+table_Z = {}
 
 #--- TODO: MAKE CLEAR WHICH REGIONS CAN BE TOUCHED AND WHICH NOT ---#
+
 #---# #---# #---#
 
 #---Option Parser
 #--- TODO: WHY PARSER DOES NOT WORK IN CMSSW ENVIRONMENT? ---#
-usage = "usage: %prog [options] \nExample: \n./combinePlotsTemplate.py -i /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config/inputListAllCurrent.txt -c analysisClass_genStudies -d /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output -l 100 -x /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/xsection_pb_default.txt -o /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output"
+usage = "usage: %prog [options] \nExample: \n./combineTablesTemplate.py -i /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config/inputListAllCurrent.txt -c analysisClass_genStudies -d /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output -l 100 -x /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/xsection_pb_default.txt -o /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output"
 
 parser = OptionParser(usage=usage)
 
@@ -27,7 +30,7 @@ parser.add_option("-i", "--inputList", dest="inputList",
                   metavar="LIST")
 
 parser.add_option("-c", "--code", dest="analysisCode",
-                  help="name of the CODE.C code used to generate the rootfiles",
+                  help="name of the CODE.C code used to generate the rootfiles (which is the beginning of the root file names before ___)",
                   metavar="CODE")
 
 parser.add_option("-d", "--inputDir", dest="inputDir",
@@ -49,11 +52,7 @@ parser.add_option("-o", "--outputDir", dest="outputDir",
 (options, args) = parser.parse_args()
 
 if len(sys.argv)<12:
-    print "ERROR: not enough arguments --> ./combinePlotsTemplate.py -h or ./combinePlotsTemplate.py --help for options"
-    sys.exit()
-
-if len(sys.argv)<2:
-    print "./combinePlotsTemplate.py -h or ./combinePlotsTemplate.py --help for options"
+    print usage
     sys.exit()
 
 #print options.analysisCode
@@ -338,25 +337,40 @@ for n, lin in enumerate( open( options.inputList ) ):
 
     #---Combine tables from different datasets
 
-    #LQtoUE
-    name = "LQtoUE"
-    if( re.search(name, dataset_mod) ):
-        UpdateTable(newtable, table_LQtoUE)
 
-    name = "LQtoUE_M250"
+    #LQtoUE
+    name = "Exotica_LQtoUE_M250"
     if( re.search(name, dataset_mod) ):
         UpdateTable(newtable, table_LQtoUE_M250)
 
-    name = "LQtoUE_M400"
+    name = "Exotica_LQtoUE_M400"
     if( re.search(name, dataset_mod) ):
         UpdateTable(newtable, table_LQtoUE_M400)
+
+    name = "Exotica_LQtoUE_M400"
+    name1 = "HerwigQCD"
+    name2 = "QCDDiJetPt" 
+    if( re.search(name, dataset_mod) or re.search(name1, dataset_mod) or re.search(name2, dataset_mod)):
+        UpdateTable(newtable, table_QCD)
+
+    name = "TTJets-madgraph"
+    if( re.search(name, dataset_mod) ):
+        UpdateTable(newtable, table_TTBAR)
+
+    name = "Zee__Summer08"
+    name1 = "ZJets-madgraph"
+    if( re.search(name, dataset_mod) or re.search(name1, dataset_mod) ):
+        UpdateTable(newtable, table_Z)
+
 
     #---End of the loop over datasets---#
 
 #--- Create final tables 
-CalculateEfficiency(table_LQtoUE)
 CalculateEfficiency(table_LQtoUE_M250)
 CalculateEfficiency(table_LQtoUE_M400)
+CalculateEfficiency(table_QCD)
+CalculateEfficiency(table_TTBAR)
+CalculateEfficiency(table_Z)
         
 #---Print table on screen
 
@@ -364,9 +378,11 @@ CalculateEfficiency(table_LQtoUE_M400)
 outputTableFile = open(options.analysisCode + "_tables.dat",'w')
 #---# #---# #---# 
 
-WriteTable(table_LQtoUE, "#--- All LQtoUE ---#", outputTableFile)
 WriteTable(table_LQtoUE_M250, "#--- LQtoUE M=250 GeV---#", outputTableFile)
 WriteTable(table_LQtoUE_M400, "#--- LQtoUE M=400 GeV---#", outputTableFile)
+WriteTable(table_QCD, "#--- QCD ---#", outputTableFile)
+WriteTable(table_TTBAR, "#--- TTBAR ---#", outputTableFile)
+WriteTable(table_Z, "#--- Z ---#", outputTableFile)
 
 #---# #---# #---# don't modify this 
 outputTableFile.close
