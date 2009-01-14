@@ -11,6 +11,12 @@ import re
 #--- ROOT general options
 gStyle.SetOptStat(1)
 gStyle.SetPalette(1)
+gStyle.SetCanvasBorderMode(0)
+gStyle.SetFrameBorderMode(0)
+gStyle.SetCanvasColor(kWhite)
+gStyle.SetPadTickX(1);
+gStyle.SetPadTickY(1);
+#gSystem.Load("~/roologon.C")
 
 #--- Declare canvas 
 #c1 = TCanvas('c1','Example',200,10,600,400)
@@ -31,8 +37,8 @@ h_LQmassAlgo2_With3Jets_LQ400.SetName("h_LQmassAlgo2_With3Jets_LQ400")
 h_LQmassAlgo_With2Jets_LQ250.SetName("h_LQmassAlgo_With2Jets_LQ250")
 h_LQmassAlgo_With2Jets_LQ400.SetName("h_LQmassAlgo_With2Jets_LQ400") 
 
+#--- TODO: MAKE CLEAR WHICH REGIONS CAN BE TOUCHED AND WHICH NOT ---#
 #---# #---# #---#
-
 
 #--- functions
 def AddHisto(inputHistoName, outputHisto, inputRootFileName, currentWeight,
@@ -205,7 +211,7 @@ for n, lin in enumerate( open( options.inputList ) ):
     
     #LQtoUE
     name = "LQtoUE"
-    rebin = int (10)
+    rebin = int (4)
     color = int(1) #black
     fillstyle = int(1001) #solid
     marker = int(20) #circle solid
@@ -216,7 +222,7 @@ for n, lin in enumerate( open( options.inputList ) ):
 
     #LQtoUE_M250
     name = "LQtoUE_M250"
-    rebin = int (10)
+    rebin = int (4)
     color = int(2) #red
     fillstyle = int(1001) #solid
     marker = int(25) #square empty
@@ -227,7 +233,7 @@ for n, lin in enumerate( open( options.inputList ) ):
 
     #LQtoUE_M400
     name = "LQtoUE_M400"
-    rebin = int (10)
+    rebin = int (4)
     color = int(3) #green
     fillstyle = int(3004) #lines
     marker = int(26) #triangle empty
@@ -244,23 +250,29 @@ for n, lin in enumerate( open( options.inputList ) ):
 
 #--- TODO: ADD AXIS TITLES ---#
 #--- TODO: ADD CORRECT STATISTICS ---#
-#--- TODO: ADD LEGEND TO THE STACK ---#
+#--- TODO: MAKE LEGEND AUTOMATIC AND ADD FUNCTION TO CREATE STACK ---#
 
 h_LQmassAlgo_With2Jets_LQstack = THStack("h_LQmassAlgo_With2Jets_LQstack","h_LQmassAlgo_With2Jets_LQstack")
 h_LQmassAlgo_With2Jets_LQstack.Add(h_LQmassAlgo_With2Jets_LQ250)
 h_LQmassAlgo_With2Jets_LQstack.Add(h_LQmassAlgo_With2Jets_LQ400)
+legend1 = TLegend(0.381,0.704,0.874,0.862);
+legend1.SetFillColor(kWhite);
+legend1.AddEntry(h_LQmassAlgo_With2Jets_LQ250,"LQ 250 GeV","f");
+legend1.AddEntry(h_LQmassAlgo_With2Jets_LQ400,"LQ 400 GeV","f");
 
 h_LQmassAlgo2_With3Jets_LQstack = THStack("h_LQmassAlgo2_With3Jets_LQstack","h_LQmassAlgo2_With3Jets_LQstack")
 h_LQmassAlgo2_With3Jets_LQstack.Add(h_LQmassAlgo_With2Jets_LQ250)
 h_LQmassAlgo2_With3Jets_LQstack.Add(h_LQmassAlgo_With2Jets_LQ400)
+legend2 = TLegend(0.381,0.704,0.874,0.862);
+legend2.SetFillColor(kWhite);
+legend2.AddEntry(h_LQmassAlgo_With2Jets_LQ250,"LQ 250 GeV","f");
+legend2.AddEntry(h_LQmassAlgo_With2Jets_LQ400,"LQ 400 GeV","f");
 
 #--- Draw and Save final plots
 
 #---# #---# #---# don't modify this 
 outputTfile = TFile( options.analysisCode + "_plots.root" , "RECREATE")
 #---# #---# #---# 
-
-#--- TODO: DRAW PLOTS ON .PS FILE ---#
 
 h_LQmassAlgo_With2Jets_LQ250.Write()
 h_LQmassAlgo2_With3Jets_LQ250.Write()
@@ -271,6 +283,16 @@ h_LQmassAlgo2_With3Jets_LQ.Write()
 h_LQmassAlgo_With2Jets_LQstack.Write()
 h_LQmassAlgo2_With3Jets_LQstack.Write()
 
+c1 = TCanvas("c_LQmassAlgo_With2Jets_LQstack");
+h_LQmassAlgo_With2Jets_LQstack.Draw()
+legend1.Draw()
+c1.Write()
+
+c2 = TCanvas("c_LQmassAlgo2_With3Jets_LQstack");
+h_LQmassAlgo2_With3Jets_LQstack.Draw()
+legend2.Draw()
+c2.Write()
+
+#---# #---# #---# don't modify this 
 outputTfile.Close()
-
-
+#---# #---# #---# 
