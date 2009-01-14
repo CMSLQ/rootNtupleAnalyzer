@@ -144,7 +144,33 @@ def CalculateEfficiency(table):
     return
 
 
-def PrintTableOnScreen(table, name):
+def WriteTable(table, name, file):
+    print >>file, name
+    print >>file, "name".rjust(10),
+    print >>file, "min".rjust(10),
+    print >>file, "max".rjust(10),
+    print >>file, "Npass".rjust(10),
+    print >>file, "errNpass".rjust(10),
+    print >>file, "EffRel".rjust(10),
+    print >>file, "errEffRel".rjust(10),
+    print >>file, "EffAbs".rjust(10),
+    print >>file, "errEffAbs".rjust(10)
+
+    for j, line in enumerate(table):
+        print >>file, table[j]['name'].rjust(10),
+        print >>file, table[j]['min'].rjust(10),
+        print >>file, table[j]['max'].rjust(10),
+        print >>file, ("%.01f" % table[j]['Npass']).rjust(10),
+        print >>file, ("%.01f" % table[j]['errNpass']).rjust(10),
+        print >>file, ("%.02f" % table[j]['EffRel']).rjust(10),
+        print >>file, ("%.02f" % table[j]['errEffRel']).rjust(10),
+        print >>file, ("%.02f" % table[j]['EffAbs']).rjust(10),
+        print >>file, ("%.02f" % table[j]['errEffAbs']).rjust(10)
+
+    print >>file, "\n"
+
+    #--- print to screen
+    
     print "\n"
     print name
     print "name".rjust(10),
@@ -286,7 +312,6 @@ for n, lin in enumerate( open( options.inputList ) ):
                               'Npass':       "%.01f" % Npass,
                               'errNpass':    "%.01f" % errNpass,
                               }
-
             
     #---# #---# #---#
 
@@ -305,8 +330,6 @@ for n, lin in enumerate( open( options.inputList ) ):
     if( re.search(name, dataset_mod) ):
         UpdateTable(newtable, table_LQtoUE_M400)
 
-#--- TODO: FIND BUG WITH 400 ---#
-                
     #---End of the loop over datasets---#
 
 #--- Create final tables 
@@ -315,9 +338,19 @@ CalculateEfficiency(table_LQtoUE_M250)
 CalculateEfficiency(table_LQtoUE_M400)
         
 #---Print table on screen
-PrintTableOnScreen(table_LQtoUE, "#--- All LQtoUE ---#")
-PrintTableOnScreen(table_LQtoUE_M250, "#--- LQtoUE M=250 GeV---#")
-PrintTableOnScreen(table_LQtoUE_M400, "#--- LQtoUE M=400 GeV---#")
+
+#---# #---# #---# don't modify this 
+outputTableFile = open(options.analysisCode + "_tables.dat",'w')
+#---# #---# #---# 
+
+WriteTable(table_LQtoUE, "#--- All LQtoUE ---#", outputTableFile)
+WriteTable(table_LQtoUE_M250, "#--- LQtoUE M=250 GeV---#", outputTableFile)
+WriteTable(table_LQtoUE_M400, "#--- LQtoUE M=400 GeV---#", outputTableFile)
+
+#---# #---# #---# don't modify this 
+outputTableFile.close
+#---# #---# #---# 
 
 #--- TODO CREATE LATEX TABLE (PYTEX?) ---#
+
 

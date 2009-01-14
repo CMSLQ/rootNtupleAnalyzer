@@ -13,20 +13,26 @@ gStyle.SetOptStat(1)
 gStyle.SetPalette(1)
 
 #--- Declare canvas 
-c1 = TCanvas('c1','Example',200,10,600,400)
-c1.SetFillColor(kWhite)
+#c1 = TCanvas('c1','Example',200,10,600,400)
+#c1.SetFillColor(kWhite)
 
 #--- Declare histograms
 h_LQmassAlgo2_With3Jets_LQ = TH1F()
 h_LQmassAlgo_With2Jets_LQ = TH1F()
-
 h_LQmassAlgo2_With3Jets_LQ250 = TH1F()
 h_LQmassAlgo_With2Jets_LQ250 = TH1F()
-
 h_LQmassAlgo2_With3Jets_LQ400 = TH1F()
 h_LQmassAlgo_With2Jets_LQ400 = TH1F() 
 
+h_LQmassAlgo2_With3Jets_LQ.SetName("h_LQmassAlgo2_With3Jets_LQ")
+h_LQmassAlgo_With2Jets_LQ.SetName("h_LQmassAlgo_With2Jets_LQ") 
+h_LQmassAlgo2_With3Jets_LQ250.SetName("h_LQmassAlgo2_With3Jets_LQ250")
+h_LQmassAlgo2_With3Jets_LQ400.SetName("h_LQmassAlgo2_With3Jets_LQ400")
+h_LQmassAlgo_With2Jets_LQ250.SetName("h_LQmassAlgo_With2Jets_LQ250")
+h_LQmassAlgo_With2Jets_LQ400.SetName("h_LQmassAlgo_With2Jets_LQ400") 
+
 #---# #---# #---#
+
 
 #--- functions
 def AddHisto(inputHistoName, outputHisto, inputRootFileName, currentWeight,
@@ -89,6 +95,7 @@ if len(sys.argv)<2:
     sys.exit()
 
 #print options.analysisCode
+
 
 #---Loop over datasets
 print "\n"
@@ -176,8 +183,9 @@ for n, lin in enumerate( open( options.inputList ) ):
 
     #---Combine histograms using PYROOT
 
-    #--- TODO: IMPROVE DRAW OPTIONS (MARKERS, LINE STYLE)---#
+    #--- TODO: IMPROVE DRAW OPTIONS (*MARKERS*??, LINE STYLE)---#
     #--- TODO: EXAMPLE WITH SEVERAL DATASETS ---#
+    #--- TODO: ADD LEGEND WITH THE NAME OF THE SAMPLE ---#
 
     #AddHisto(inputHistoName, outputHisto, inputRootFileName, datasetIdx, currentWeight):
 
@@ -236,61 +244,33 @@ for n, lin in enumerate( open( options.inputList ) ):
 
 #--- TODO: ADD AXIS TITLES ---#
 #--- TODO: ADD CORRECT STATISTICS ---#
+#--- TODO: ADD LEGEND TO THE STACK ---#
 
-h_LQmassAlgo_With2Jets_LQstack = THStack()
+h_LQmassAlgo_With2Jets_LQstack = THStack("h_LQmassAlgo_With2Jets_LQstack","h_LQmassAlgo_With2Jets_LQstack")
 h_LQmassAlgo_With2Jets_LQstack.Add(h_LQmassAlgo_With2Jets_LQ250)
 h_LQmassAlgo_With2Jets_LQstack.Add(h_LQmassAlgo_With2Jets_LQ400)
 
-h_LQmassAlgo2_With3Jets_LQstack = THStack()
+h_LQmassAlgo2_With3Jets_LQstack = THStack("h_LQmassAlgo2_With3Jets_LQstack","h_LQmassAlgo2_With3Jets_LQstack")
 h_LQmassAlgo2_With3Jets_LQstack.Add(h_LQmassAlgo_With2Jets_LQ250)
 h_LQmassAlgo2_With3Jets_LQstack.Add(h_LQmassAlgo_With2Jets_LQ400)
 
 #--- Draw and Save final plots
 
+#---# #---# #---# don't modify this 
+outputTfile = TFile( options.analysisCode + "_plots.root" , "RECREATE")
+#---# #---# #---# 
+
 #--- TODO: DRAW PLOTS ON .PS FILE ---#
 
-c1.Divide(4,2)
+h_LQmassAlgo_With2Jets_LQ250.Write()
+h_LQmassAlgo2_With3Jets_LQ250.Write()
+h_LQmassAlgo_With2Jets_LQ400.Write()
+h_LQmassAlgo2_With3Jets_LQ400.Write()
+h_LQmassAlgo_With2Jets_LQ.Write()
+h_LQmassAlgo2_With3Jets_LQ.Write()
+h_LQmassAlgo_With2Jets_LQstack.Write()
+h_LQmassAlgo2_With3Jets_LQstack.Write()
 
-c1.cd(1)
-c1_1.SetLogy();
-h_LQmassAlgo_With2Jets_LQ250.Draw()
-c1.Update()
-
-c1.cd(2)
-c1_2.SetLogy();
-h_LQmassAlgo2_With3Jets_LQ250.Draw()
-c1.Update()
-
-c1.cd(3)
-c1_3.SetLogy();
-h_LQmassAlgo_With2Jets_LQ400.Draw()
-c1.Update()
-
-c1.cd(4)
-c1_4.SetLogy();
-h_LQmassAlgo2_With3Jets_LQ400.Draw()
-c1.Update()
-
-c1.cd(5)
-c1_5.SetLogy();
-h_LQmassAlgo_With2Jets_LQ.Draw()
-c1.Update()
-
-c1.cd(6)
-c1_6.SetLogy();
-h_LQmassAlgo2_With3Jets_LQ.Draw()
-c1.Update()
-
-c1.cd(7)
-c1_7.SetLogy();
-h_LQmassAlgo_With2Jets_LQstack.Draw()
-c1.Update()
-
-c1.cd(8)
-c1_8.SetLogy();
-h_LQmassAlgo2_With3Jets_LQstack.Draw()
-c1.Update()
-
-c1.SaveAs("combinePlotsTemplate.root")
+outputTfile.Close()
 
 
