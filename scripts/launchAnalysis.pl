@@ -40,7 +40,7 @@ open (INPUTLIST, "<$inputList") || die ("...error reading file $inputList $!");
 #print @inputList;
 close(INPUTLIST);
 
-open (FILE, "ls -l src/analysisClass.C |") || die ("...error reading file $inputList $!");
+open (FILE, "ls -l src/analysisClass.C |") || die ("...error reading the file src/analysisClass.C $!");
 $analysisClassFull = <FILE>;
 close(FILE);
 
@@ -48,6 +48,9 @@ close(FILE);
 my @array = split(/\s+/ , $analysisClassFull );
 #print "$analysisClassFull\n";
 #print "$array[10]\n";
+
+if ( scalar(@array) != 11 ) 
+{die ("...error src/analysisClass.C is not a symbolic link");}
 
 ## 2nd split
 my @codenameC = split(/\// , $array[10] );

@@ -8,16 +8,16 @@ import os.path
 from ROOT import *
 import re
 
-#---Declare efficiency tables
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%begin
+
+#---1) Declare efficiency tables
 table_LQtoUE_M250 = {}
 table_LQtoUE_M400 = {}
 table_QCD = {}
 table_TTBAR = {}
 table_Z = {}
 
-#--- TODO: MAKE CLEAR WHICH REGIONS CAN BE TOUCHED AND WHICH NOT ---#
-
-#---# #---# #---#
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%end
 
 #---Option Parser
 #--- TODO: WHY PARSER DOES NOT WORK IN CMSSW ENVIRONMENT? ---#
@@ -120,19 +120,31 @@ def CalculateEfficiency(table):
                              }
         else:
             N = float(table[j]['N']) 
-            errN = sqrt(float(table[j]["errN"])) 
-            errRelN = errN / N 
+            errN = sqrt(float(table[j]["errN"]))
+            if( float(N) > 0 ):
+                errRelN = errN / N 
+            else:
+                errRelN = float(0)
 
             Npass = float(table[j]['Npass']) 
             errNpass = sqrt(float(table[j]["errNpass"]))
-            errRelNpass = errNpass / Npass 
+            if( float(Npass) > 0 ):
+                errRelNpass = errNpass / Npass
+            else:
+                errRelNpass = float(0)
 
-            EffRel = Npass / N
-            errRelEffRel = sqrt( errRelNpass*errRelNpass + errRelN*errRelN )
-            errEffRel = errRelEffRel * EffRel
+            if(Npass > 0  and N >0 ):
+                EffRel = Npass / N
+                errRelEffRel = sqrt( errRelNpass*errRelNpass + errRelN*errRelN )
+                errEffRel = errRelEffRel * EffRel
             
-            EffAbs = Npass / float(table[0]['N'])
-            errEffAbs = errNpass / float(table[0]['N'])
+                EffAbs = Npass / float(table[0]['N'])
+                errEffAbs = errNpass / float(table[0]['N'])
+            else:
+                EffRel = 0
+                errEffRel = 0
+                EffAbs = 0
+                errEffAbs = 0 
             
             table[int(j)]={'name': table[int(j)]['name'],
                            'min1': table[int(j)]['min1'],
@@ -152,32 +164,34 @@ def CalculateEfficiency(table):
     return
 
 
+#--- TODO: FIX TABLE FORMAT (NUMBER OF DECIMAL PLATES AFTER THE 0)
+
 def WriteTable(table, name, file):
     print >>file, name
-    print >>file, "name".rjust(10),
-    print >>file, "min1".rjust(10),
-    print >>file, "max1".rjust(10),
-    print >>file, "min2".rjust(10),
-    print >>file, "max2".rjust(10),
-    print >>file, "Npass".rjust(10),
-    print >>file, "errNpass".rjust(10),
-    print >>file, "EffRel".rjust(10),
-    print >>file, "errEffRel".rjust(10),
-    print >>file, "EffAbs".rjust(10),
-    print >>file, "errEffAbs".rjust(10)
+    print >>file, "name".rjust(15),
+    print >>file, "min1".rjust(15),
+    print >>file, "max1".rjust(15),
+    print >>file, "min2".rjust(15),
+    print >>file, "max2".rjust(15),
+    print >>file, "Npass".rjust(15),
+    print >>file, "errNpass".rjust(15),
+    print >>file, "EffRel".rjust(15),
+    print >>file, "errEffRel".rjust(15),
+    print >>file, "EffAbs".rjust(15),
+    print >>file, "errEffAbs".rjust(15)
 
     for j, line in enumerate(table):
-        print >>file, table[j]['name'].rjust(10),
-        print >>file, table[j]['min1'].rjust(10),
-        print >>file, table[j]['max1'].rjust(10),
-        print >>file, table[j]['min2'].rjust(10),
-        print >>file, table[j]['max2'].rjust(10),
-        print >>file, ("%.01f" % table[j]['Npass']).rjust(10),
-        print >>file, ("%.01f" % table[j]['errNpass']).rjust(10),
-        print >>file, ("%.02f" % table[j]['EffRel']).rjust(10),
-        print >>file, ("%.02f" % table[j]['errEffRel']).rjust(10),
-        print >>file, ("%.02f" % table[j]['EffAbs']).rjust(10),
-        print >>file, ("%.02f" % table[j]['errEffAbs']).rjust(10)
+        print >>file, table[j]['name'].rjust(15),
+        print >>file, table[j]['min1'].rjust(15),
+        print >>file, table[j]['max1'].rjust(15),
+        print >>file, table[j]['min2'].rjust(15),
+        print >>file, table[j]['max2'].rjust(15),
+        print >>file, ("%.01f" % table[j]['Npass']).rjust(15),
+        print >>file, ("%.01f" % table[j]['errNpass']).rjust(15),
+        print >>file, ("%.01e" % table[j]['EffRel']).rjust(15),
+        print >>file, ("%.01e" % table[j]['errEffRel']).rjust(15),
+        print >>file, ("%.01e" % table[j]['EffAbs']).rjust(15),
+        print >>file, ("%.01e" % table[j]['errEffAbs']).rjust(15)
 
     print >>file, "\n"
 
@@ -185,30 +199,30 @@ def WriteTable(table, name, file):
     
     print "\n"
     print name
-    print "name".rjust(10),
-    print "min1".rjust(10),
-    print "max1".rjust(10),
-    print "min2".rjust(10),
-    print "max2".rjust(10),
-    print "Npass".rjust(10),
-    print "errNpass".rjust(10),
-    print "EffRel".rjust(10),
-    print "errEffRel".rjust(10),
-    print "EffAbs".rjust(10),
-    print "errEffAbs".rjust(10)
+    print "name".rjust(15),
+    print "min1".rjust(15),
+    print "max1".rjust(15),
+    print "min2".rjust(15),
+    print "max2".rjust(15),
+    print "Npass".rjust(15),
+    print "errNpass".rjust(15),
+    print "EffRel".rjust(15),
+    print "errEffRel".rjust(15),
+    print "EffAbs".rjust(15),
+    print "errEffAbs".rjust(15)
 
     for j, line in enumerate(table):
-        print table[j]['name'].rjust(10),
-        print table[j]['min1'].rjust(10),
-        print table[j]['max1'].rjust(10),
-        print table[j]['min2'].rjust(10),
-        print table[j]['max2'].rjust(10),
-        print ("%.01f" % table[j]['Npass']).rjust(10),
-        print ("%.01f" % table[j]['errNpass']).rjust(10),
-        print ("%.02f" % table[j]['EffRel']).rjust(10),
-        print ("%.02f" % table[j]['errEffRel']).rjust(10),
-        print ("%.02f" % table[j]['EffAbs']).rjust(10),
-        print ("%.02f" % table[j]['errEffAbs']).rjust(10)
+        print table[j]['name'].rjust(15),
+        print table[j]['min1'].rjust(15),
+        print table[j]['max1'].rjust(15),
+        print table[j]['min2'].rjust(15),
+        print table[j]['max2'].rjust(15),
+        print ("%.01f" % table[j]['Npass']).rjust(15),
+        print ("%.01f" % table[j]['errNpass']).rjust(15),
+        print ("%.01e" % table[j]['EffRel']).rjust(15),
+        print ("%.01e" % table[j]['errEffRel']).rjust(15),
+        print ("%.01e" % table[j]['EffAbs']).rjust(15),
+        print ("%.01e" % table[j]['errEffAbs']).rjust(15)
 
     return
 
@@ -316,11 +330,18 @@ for n, lin in enumerate( open( options.inputList ) ):
         else:
             N = ( float(data[j]['N']) * weight )
             errN = ( float(data[j-1]["errEffAbs"]) * xsection_X_intLumi )
-            errRelN = errN / N 
+            if( float(N) > 0 ):
+                errRelN = errN / N 
+            else:
+                errRelN = float(0)
+
             
             Npass = ( float(data[j]['Npass']) * weight) 
             errNpass = ( float(data[j]["errEffAbs"]) * xsection_X_intLumi )
-            errRelNpass = errNpass / Npass 
+            if( float(Npass) > 0 ):
+                errRelNpass = errNpass / Npass
+            else:
+                errRelNpass = float(0)
             
             newtable[int(j)]={'name': data[j]['name'],
                               'min1': data[j]['min1'],
@@ -332,57 +353,73 @@ for n, lin in enumerate( open( options.inputList ) ):
                               'Npass':       "%.01f" % Npass,
                               'errNpass':    "%.01f" % errNpass,
                               }
+
+
+    #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%begin
             
-    #---# #---# #---#
+    #---2) Combine tables from different datasets
 
-    #---Combine tables from different datasets
-
-
-    #LQtoUE
+    #LQtoUE_M250
     name = "Exotica_LQtoUE_M250"
     if( re.search(name, dataset_mod) ):
         UpdateTable(newtable, table_LQtoUE_M250)
 
+    #LQtoUE_M400
     name = "Exotica_LQtoUE_M400"
     if( re.search(name, dataset_mod) ):
         UpdateTable(newtable, table_LQtoUE_M400)
 
-    name = "Exotica_LQtoUE_M400"
+    #QCD
+    name = "PYTHIA8PhotonJetPt"
     name1 = "HerwigQCD"
     name2 = "QCDDiJetPt" 
     if( re.search(name, dataset_mod) or re.search(name1, dataset_mod) or re.search(name2, dataset_mod)):
         UpdateTable(newtable, table_QCD)
 
+    #TTBAR
     name = "TTJets-madgraph"
     if( re.search(name, dataset_mod) ):
         UpdateTable(newtable, table_TTBAR)
 
-    name = "Zee__Summer08"
+    #Z
+    name = "Zee"
     name1 = "ZJets-madgraph"
     if( re.search(name, dataset_mod) or re.search(name1, dataset_mod) ):
         UpdateTable(newtable, table_Z)
 
+    #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%end
 
     #---End of the loop over datasets---#
 
-#--- Create final tables 
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%begin 
+
+#---3) Create final tables 
 CalculateEfficiency(table_LQtoUE_M250)
 CalculateEfficiency(table_LQtoUE_M400)
 CalculateEfficiency(table_QCD)
 CalculateEfficiency(table_TTBAR)
 CalculateEfficiency(table_Z)
         
-#---Print table on screen
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%end
+
 
 #---# #---# #---# don't modify this 
 outputTableFile = open(options.analysisCode + "_tables.dat",'w')
 #---# #---# #---# 
+
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%begin
+#---4) Write tables
 
 WriteTable(table_LQtoUE_M250, "#--- LQtoUE M=250 GeV---#", outputTableFile)
 WriteTable(table_LQtoUE_M400, "#--- LQtoUE M=400 GeV---#", outputTableFile)
 WriteTable(table_QCD, "#--- QCD ---#", outputTableFile)
 WriteTable(table_TTBAR, "#--- TTBAR ---#", outputTableFile)
 WriteTable(table_Z, "#--- Z ---#", outputTableFile)
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%end
+
 
 #---# #---# #---# don't modify this 
 outputTableFile.close

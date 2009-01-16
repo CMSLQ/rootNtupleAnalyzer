@@ -115,9 +115,9 @@ sub help(){
     print "Usage: ./createList.pl -d <inputDir> -m <match> -o <outputDir> [-h <help?>] \n";
     print "Example: ./createList.pl -d /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/output -m root -o /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config \n";
     print "Options:\n";
-    print "-d <inputDir>:       choose the input directory containing the files\n";
+    print "-d <inputDir>:       choose the input directory containing the files (FULL PATH REQUIRED + NO SLASH AT THE END)\n";
     print "-m <match>:          choose the parameter MATCH, will be used to select only the files whose filename matches with the string MATCH\n";
-    print "-o <outputDir>:      choose the output directory where the .txt list files will be stored\n";
+    print "-o <outputDir>:      choose the output directory where the .txt list files will be stored (FULL PATH REQUIRED NO SLASH AT THE END)\n";
     print "-h <yes> :           to print the help \n";
     die "please, try again...\n";
 }

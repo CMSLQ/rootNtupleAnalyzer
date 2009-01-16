@@ -8,56 +8,6 @@ import os.path
 from ROOT import *
 import re
 
-#--- ROOT general options
-gStyle.SetOptStat(1)
-gStyle.SetPalette(1)
-gStyle.SetCanvasBorderMode(0)
-gStyle.SetFrameBorderMode(0)
-gStyle.SetCanvasColor(kWhite)
-gStyle.SetPadTickX(1);
-gStyle.SetPadTickY(1);
-#gSystem.Load("~/roologon.C")
-
-#--- Declare canvas 
-#c1 = TCanvas('c1','Example',200,10,600,400)
-#c1.SetFillColor(kWhite)
-
-#--- Declare histograms
-h_LQmassAlgo2_With3Jets_LQ = TH1F()
-h_LQmassAlgo_With2Jets_LQ = TH1F()
-h_LQmassAlgo2_With3Jets_LQ250 = TH1F()
-h_LQmassAlgo_With2Jets_LQ250 = TH1F()
-h_LQmassAlgo2_With3Jets_LQ400 = TH1F()
-h_LQmassAlgo_With2Jets_LQ400 = TH1F() 
-
-h_LQmassAlgo2_With3Jets_LQ.SetName("h_LQmassAlgo2_With3Jets_LQ")
-h_LQmassAlgo_With2Jets_LQ.SetName("h_LQmassAlgo_With2Jets_LQ") 
-h_LQmassAlgo2_With3Jets_LQ250.SetName("h_LQmassAlgo2_With3Jets_LQ250")
-h_LQmassAlgo2_With3Jets_LQ400.SetName("h_LQmassAlgo2_With3Jets_LQ400")
-h_LQmassAlgo_With2Jets_LQ250.SetName("h_LQmassAlgo_With2Jets_LQ250")
-h_LQmassAlgo_With2Jets_LQ400.SetName("h_LQmassAlgo_With2Jets_LQ400") 
-
-#--- TODO: MAKE CLEAR WHICH REGIONS CAN BE TOUCHED AND WHICH NOT ---#
-#---# #---# #---#
-
-#--- functions
-def AddHisto(inputHistoName, outputHisto, inputRootFileName, currentWeight,
-             rebin=int(1), currentColor=int(1), currentFillStyle=int(1001), currentMarker=int(1)):
-    file = TFile(inputRootFile);
-    #file.ls()
-    htemp = file.Get(inputHistoName)
-    htemp.Rebin(rebin)
-    if( outputHisto.GetNbinsX() != htemp.GetNbinsX() ):
-        outputHisto.SetStats(1)
-        outputHisto.SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax())
-    outputHisto.Add(htemp, currentWeight)
-    outputHisto.SetFillColor(currentColor)
-    outputHisto.SetFillStyle(currentFillStyle)
-    outputHisto.SetMarkerStyle(currentMarker)
-    outputHisto.SetMarkerColor(currentColor)
-
-    file.Close()
-    return
 
 #---Option Parser
 #--- TODO: WHY PARSER DOES NOT WORK IN CMSSW ENVIRONMENT? ---#
@@ -103,6 +53,54 @@ if len(sys.argv)<2:
 #print options.analysisCode
 
 
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%begin
+
+#--- Declare histograms
+dictSamples = {"LQtoUE_M250": ["Exotica_LQtoUE_M250"],
+               "LQtoUE_M400": ["Exotica_LQtoUE_M400"],
+               "Z": ["Zee","ZJets-madgraph"],
+               "QCD": ["HerwigQCDPt","PYTHIA8PhotonJetPt","QCDDiJetPt"],
+               "TTBAR": ["TTJets-madgraph"] }
+dictFinalHisto = {}
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%end
+
+#--- functions
+def UpdateHistograms(name, N, listHisto, inputRootFile, weight, dataset_mod, listNames):
+    file = TFile(inputRootFile);
+    #file.ls()
+    print N
+    print name
+    nHistos = int( file.GetListOfKeys().GetEntries() )
+
+    htemp = TH1F()
+
+    for h in range(0, nHistos):
+        print file.GetListOfKeys()[h].GetName()
+
+        htemp = file.Get(file.GetListOfKeys()[h].GetName())
+        #print htemp.GetEntries()
+
+        listHisto[name][h].GetEntries()
+
+        toBeUpdated = False
+        for i, String in enumerate (listNames[name]):
+            print String
+            if( re.search(String, dataset_mod) ):
+                print "toBeUpdated"
+                toBeUpdated = True
+                break
+
+        print toBeUpdated
+
+        if(toBeUpdated):
+            listHisto[name][h].Add(htemp, weight)
+
+            #    outputHisto.Add(htemp, currentWeight)
+
+    file.Close()
+    return
+
 #---Loop over datasets
 print "\n"
 for n, lin in enumerate( open( options.inputList ) ):
@@ -111,7 +109,7 @@ for n, lin in enumerate( open( options.inputList ) ):
     #print lin
     
     dataset_mod = string.split( string.split(lin, "/" )[-1], ".")[0]
-    print dataset_mod + " ... "
+    print "\n" + str(n) + " " + dataset_mod + " ... "
 
     inputRootFile = options.inputDir + "/" + options.analysisCode + "___" + dataset_mod + ".root"
     inputDataFile = options.inputDir + "/" + options.analysisCode + "___" + dataset_mod + ".dat"
@@ -164,7 +162,7 @@ for n, lin in enumerate( open( options.inputList ) ):
     
     for j,line in enumerate( open( inputDataFile ) ):
         line = string.strip(line,"\n")
-        print line
+        #print line
         
         if j == 0:
             for i,piece in enumerate(line.split()):
@@ -185,114 +183,63 @@ for n, lin in enumerate( open( options.inputList ) ):
     #---Calculate weight
     Ntot = int(data[0]['N'])
     weight = float(xsection_val) * float(options.intLumi) / Ntot 
-    print "weight: " + str(weight)
+    #print "weight: " + str(weight)
 
+    
     #---Combine histograms using PYROOT
 
-    #--- TODO: IMPROVE DRAW OPTIONS (*MARKERS*??, LINE STYLE)---#
-    #--- TODO: EXAMPLE WITH SEVERAL DATASETS ---#
-    #--- TODO: ADD LEGEND WITH THE NAME OF THE SAMPLE ---#
+    file = TFile(inputRootFile)
+    nHistos = int( file.GetListOfKeys().GetEntries() )
+    #print "nHistos: " , nHistos, "\n"
 
-    #AddHisto(inputHistoName, outputHisto, inputRootFileName, datasetIdx, currentWeight):
+    # loop over samples
+    for S,sample in enumerate( dictSamples ):
+        #print "current sample is : " , sample
 
-    #-legend
-    #color = int(1) #black
-    #color = int(2) #red
-    #color = int(3) #green
-    #fillstyle = int(0) #hollow
-    #fillstyle = int(3002) #dots
-    #fillstyle = int(3004) #lines
-    #marker = int(20) #circle solid
-    #marker = int(24) #circle empty
-    #marker = int(21) #square solid
-    #marker = int(25) #square empty
-    #marker = int(22) #trinagle solid
-    #marker = int(26) #triangle empty
+        if( n == 0): 
+            dictFinalHisto[sample] = {}
+
+        # loop over histograms in rootfile
+        for h in range(0, nHistos):
+            histoName = file.GetListOfKeys()[h].GetName()
+            htemp = file.Get(histoName)
+
+            if(n == 0):
+                dictFinalHisto[sample][h] = TH1F()
+                dictFinalHisto[sample][h].SetName("histo_" + sample + "_" + histoName )
+                dictFinalHisto[sample][h].SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax())
+
+            #print "current histo is : " , dictFinalHisto[sample][h].GetName()
+
+            #update histo
+
+            #print "dataset strings in this sample"
+            toBeUpdated = False
+            for mS, matchString in enumerate (dictSamples[sample]):
+                #print matchString
+                if( re.search(matchString, dataset_mod) ):
+                    #print "toBeUpdated"
+                    toBeUpdated = True
+                    break
+            #print toBeUpdated
+            if(toBeUpdated):
+                dictFinalHisto[sample][h].Add(htemp, weight)
+
+    #print "--> TEST <--"
+    #for S,sample in enumerate( dictSamples ):
+        #print "--> current sample: " + sample
+        #print dictFinalHisto[sample] 
     
-    #LQtoUE
-    name = "LQtoUE"
-    rebin = int (4)
-    color = int(1) #black
-    fillstyle = int(1001) #solid
-    marker = int(20) #circle solid
-    
-    if( re.search(name, dataset_mod) ):
-        AddHisto("h_LQmassAlgo_With2Jets", h_LQmassAlgo_With2Jets_LQ, inputRootFile, weight, rebin, color, fillstyle, marker)
-        AddHisto("h_LQmassAlgo2_With3Jets", h_LQmassAlgo2_With3Jets_LQ, inputRootFile, weight, rebin, color, fillstyle, marker)
-
-    #LQtoUE_M250
-    name = "LQtoUE_M250"
-    rebin = int (4)
-    color = int(2) #red
-    fillstyle = int(1001) #solid
-    marker = int(25) #square empty
-
-    if( re.search(name, dataset_mod) ):
-        AddHisto("h_LQmassAlgo_With2Jets", h_LQmassAlgo_With2Jets_LQ250, inputRootFile, weight, rebin, color, fillstyle, marker)
-        AddHisto("h_LQmassAlgo2_With3Jets", h_LQmassAlgo2_With3Jets_LQ250, inputRootFile, weight, rebin, color, fillstyle, marker)
-
-    #LQtoUE_M400
-    name = "LQtoUE_M400"
-    rebin = int (4)
-    color = int(3) #green
-    fillstyle = int(3004) #lines
-    marker = int(26) #triangle empty
-
-    if( re.search(name, dataset_mod) ):
-        AddHisto("h_LQmassAlgo_With2Jets", h_LQmassAlgo_With2Jets_LQ400, inputRootFile, weight, rebin, color, fillstyle, marker)
-        AddHisto("h_LQmassAlgo2_With3Jets", h_LQmassAlgo2_With3Jets_LQ400, inputRootFile, weight, rebin, color, fillstyle, marker)
-
-
     #---End of the loop over datasets---#
 
+print "\n"
 
-#--- Create final plots (stacks)
-
-#--- TODO: ADD AXIS TITLES ---#
-#--- TODO: ADD CORRECT STATISTICS ---#
-#--- TODO: MAKE LEGEND AUTOMATIC AND ADD FUNCTION TO CREATE STACK ---#
-
-h_LQmassAlgo_With2Jets_LQstack = THStack("h_LQmassAlgo_With2Jets_LQstack","h_LQmassAlgo_With2Jets_LQstack")
-h_LQmassAlgo_With2Jets_LQstack.Add(h_LQmassAlgo_With2Jets_LQ250)
-h_LQmassAlgo_With2Jets_LQstack.Add(h_LQmassAlgo_With2Jets_LQ400)
-legend1 = TLegend(0.381,0.704,0.874,0.862);
-legend1.SetFillColor(kWhite);
-legend1.AddEntry(h_LQmassAlgo_With2Jets_LQ250,"LQ 250 GeV","f");
-legend1.AddEntry(h_LQmassAlgo_With2Jets_LQ400,"LQ 400 GeV","f");
-
-h_LQmassAlgo2_With3Jets_LQstack = THStack("h_LQmassAlgo2_With3Jets_LQstack","h_LQmassAlgo2_With3Jets_LQstack")
-h_LQmassAlgo2_With3Jets_LQstack.Add(h_LQmassAlgo_With2Jets_LQ250)
-h_LQmassAlgo2_With3Jets_LQstack.Add(h_LQmassAlgo_With2Jets_LQ400)
-legend2 = TLegend(0.381,0.704,0.874,0.862);
-legend2.SetFillColor(kWhite);
-legend2.AddEntry(h_LQmassAlgo_With2Jets_LQ250,"LQ 250 GeV","f");
-legend2.AddEntry(h_LQmassAlgo_With2Jets_LQ400,"LQ 400 GeV","f");
-
-#--- Draw and Save final plots
-
-#---# #---# #---# don't modify this 
 outputTfile = TFile( options.analysisCode + "_plots.root" , "RECREATE")
-#---# #---# #---# 
 
-h_LQmassAlgo_With2Jets_LQ250.Write()
-h_LQmassAlgo2_With3Jets_LQ250.Write()
-h_LQmassAlgo_With2Jets_LQ400.Write()
-h_LQmassAlgo2_With3Jets_LQ400.Write()
-h_LQmassAlgo_With2Jets_LQ.Write()
-h_LQmassAlgo2_With3Jets_LQ.Write()
-h_LQmassAlgo_With2Jets_LQstack.Write()
-h_LQmassAlgo2_With3Jets_LQstack.Write()
+for sample in ( dictFinalHisto ):
+    for h, histo in enumerate ( dictFinalHisto[sample] ):
+        print "writing histo: " , dictFinalHisto[sample][histo].GetName()
+        dictFinalHisto[sample][histo].Write()
 
-c1 = TCanvas("c_LQmassAlgo_With2Jets_LQstack");
-h_LQmassAlgo_With2Jets_LQstack.Draw()
-legend1.Draw()
-c1.Write()
-
-c2 = TCanvas("c_LQmassAlgo2_With3Jets_LQstack");
-h_LQmassAlgo2_With3Jets_LQstack.Draw()
-legend2.Draw()
-c2.Write()
-
-#---# #---# #---# don't modify this 
 outputTfile.Close()
-#---# #---# #---# 
+    
