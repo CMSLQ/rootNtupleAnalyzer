@@ -247,6 +247,7 @@ b1) TO DO list to improve the code
   * .pl and .py scripts: fix the path (modify code so that the full path is not required)
   * .py scripts: fix the help message (problem when calling PYROOT using the CMSSW python environment variables)
   * redirect output of "launchAnalysis.pl" on a .log file
+  * combineTablesTemplate.py: use the values of min1,max1,min2,max2 provided by Paolo's code
 
 - For Paolo
   * update instructions for rootNtupleAnalyzer
