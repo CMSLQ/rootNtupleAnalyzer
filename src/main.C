@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
     {
       cout << "main() : arcg = " << argc << " is different from " << Nparam+1 <<". Exiting." <<endl;
       cout << "Usage  : ./main inputList cutFile treeName outputRootFileWithoutExtension outputEfficiencyFileWithoutExtension" << endl;
-      cout << "Example: ./main config/inputListExample.txt config/cutFileExample.txt RootNtupleMaker data/output/rootFile data/output/cutEfficiencyFile" << endl;
+      cout << "Example: ./main config/inputListExample.txt config/cutFileExample.txt RootTupleMaker data/output/rootFile data/output/cutEfficiencyFile" << endl;
       exit (1);
     };
 
