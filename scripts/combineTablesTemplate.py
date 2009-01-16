@@ -8,20 +8,10 @@ import os.path
 from ROOT import *
 import re
 
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%begin
-
-#---1) Declare efficiency tables
-table_LQtoUE_M250 = {}
-table_LQtoUE_M400 = {}
-table_QCD = {}
-table_TTBAR = {}
-table_Z = {}
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%end
 
 #---Option Parser
 #--- TODO: WHY PARSER DOES NOT WORK IN CMSSW ENVIRONMENT? ---#
-usage = "usage: %prog [options] \nExample: \n./combineTablesTemplate.py -i /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config/inputListAllCurrent.txt -c analysisClass_genStudies -d /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output -l 100 -x /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/xsection_pb_default.txt -o /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output"
+usage = "usage: %prog [options] \nExample: \n./combineTablesTemplate.py -i /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config/inputListAllCurrent.txt -c analysisClass_genStudies -d /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output -l 100 -x /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/xsection_pb_default.txt -o /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output -s /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config/sampleListForMerging.txt"
 
 parser = OptionParser(usage=usage)
 
@@ -49,16 +39,41 @@ parser.add_option("-o", "--outputDir", dest="outputDir",
                   help="the directory OUTDIR contains the output of the program (full path required)",
                   metavar="OUTDIR")
 
+parser.add_option("-s", "--sampleListForMerging", dest="sampleListForMerging",
+                  help="put in the file SAMPLELIST the name of the sample with the associated strings which should  match with the dataset name (full path required)",
+                  metavar="SAMPLELIST")
+
 (options, args) = parser.parse_args()
 
-if len(sys.argv)<12:
+if len(sys.argv)<14:
     print usage
     sys.exit()
 
 #print options.analysisCode
 
 
+#---Check if sampleListForMerging file exist
+if(os.path.isfile(options.sampleListForMerging) == False):
+    print "ERROR: file " + options.sampleListForMerging + " not found"
+    print "exiting..."
+    sys.exit()
 
+#--- Declare efficiency tables
+dictSamples = {}
+
+for l,line in enumerate( open( options.sampleListForMerging ) ):
+    line = string.strip(line,"\n")
+    print line
+    
+    for i,piece in enumerate(line.split()):
+        print "i=", i , "  piece= " , piece
+        if (i == 0):
+            key = piece
+            dictSamples[key] = []
+        else:
+            dictSamples[key].append(piece)
+ 
+dictFinalTables = {}
 
 #--- Functions
 
@@ -354,77 +369,44 @@ for n, lin in enumerate( open( options.inputList ) ):
                               'errNpass':    "%.01f" % errNpass,
                               }
 
+    #---Combine tables from different datasets
+    
+    # loop over samples
+    for S,sample in enumerate( dictSamples ):
+        #print "current sample is : " , sample
 
-    #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%begin
-            
-    #---2) Combine tables from different datasets
+        if( n == 0): 
+            dictFinalTables[sample] = {}
 
-    #LQtoUE_M250
-    name = "Exotica_LQtoUE_M250"
-    if( re.search(name, dataset_mod) ):
-        UpdateTable(newtable, table_LQtoUE_M250)
+        toBeUpdated = False
+        for mS, matchString in enumerate (dictSamples[sample]):
+            #print matchString
+            if( re.search(matchString, dataset_mod) ):
+                #print "toBeUpdated"
+                toBeUpdated = True
+                break
 
-    #LQtoUE_M400
-    name = "Exotica_LQtoUE_M400"
-    if( re.search(name, dataset_mod) ):
-        UpdateTable(newtable, table_LQtoUE_M400)
-
-    #QCD
-    name = "PYTHIA8PhotonJetPt"
-    name1 = "HerwigQCD"
-    name2 = "QCDDiJetPt" 
-    if( re.search(name, dataset_mod) or re.search(name1, dataset_mod) or re.search(name2, dataset_mod)):
-        UpdateTable(newtable, table_QCD)
-
-    #TTBAR
-    name = "TTJets-madgraph"
-    if( re.search(name, dataset_mod) ):
-        UpdateTable(newtable, table_TTBAR)
-
-    #Z
-    name = "Zee"
-    name1 = "ZJets-madgraph"
-    if( re.search(name, dataset_mod) or re.search(name1, dataset_mod) ):
-        UpdateTable(newtable, table_Z)
-
-    #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%end
+        #print toBeUpdated
+        if(toBeUpdated):
+            UpdateTable(newtable, dictFinalTables[sample])
 
     #---End of the loop over datasets---#
 
+outputTableFile = open(options.outputDir + "/" + options.analysisCode + "_tables.dat",'w')
 
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%begin 
+for S,sample in enumerate( dictSamples ):
+    #print "current sample is: ", sample
+    #print dictFinalTables[sample]
 
-#---3) Create final tables 
-CalculateEfficiency(table_LQtoUE_M250)
-CalculateEfficiency(table_LQtoUE_M400)
-CalculateEfficiency(table_QCD)
-CalculateEfficiency(table_TTBAR)
-CalculateEfficiency(table_Z)
-        
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%end
+    #---Create final tables 
+    CalculateEfficiency(dictFinalTables[sample])
+    #--- Write tables
+    WriteTable(dictFinalTables[sample], sample, outputTableFile)
 
-
-#---# #---# #---# don't modify this 
-outputTableFile = open(options.analysisCode + "_tables.dat",'w')
-#---# #---# #---# 
-
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%begin
-#---4) Write tables
-
-WriteTable(table_LQtoUE_M250, "#--- LQtoUE M=250 GeV---#", outputTableFile)
-WriteTable(table_LQtoUE_M400, "#--- LQtoUE M=400 GeV---#", outputTableFile)
-WriteTable(table_QCD, "#--- QCD ---#", outputTableFile)
-WriteTable(table_TTBAR, "#--- TTBAR ---#", outputTableFile)
-WriteTable(table_Z, "#--- Z ---#", outputTableFile)
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%end
-
-
-#---# #---# #---# don't modify this 
 outputTableFile.close
-#---# #---# #---# 
 
-#--- TODO CREATE LATEX TABLE (PYTEX?) ---#
+print "output tables at: ", options.outputDir + "/" + options.analysisCode + "_tables.dat"
+
+#---TODO: CREATE LATEX TABLE (PYTEX?) ---#
 
 

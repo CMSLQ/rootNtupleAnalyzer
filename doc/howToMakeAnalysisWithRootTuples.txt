@@ -171,6 +171,30 @@ Create a file with the cross section (in pb) for each dataset. An example is alr
 
 In this example we'll use the file:
   /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/xsection_pb_default.txt
+  /Exotica_LQtoCMu_M250/Summer08_IDEAL_V9_v1/GEN-SIM-RECO 5.82
+  /Exotica_LQtoCMu_M400/Summer08_IDEAL_V9_v1/GEN-SIM-RECO 0.432
+  /Exotica_LQtoUE_M250/Summer08_IDEAL_V9_v1/GEN-SIM-RECO 5.82
+  /Exotica_LQtoUE_M400/Summer08_IDEAL_V9_v1/GEN-SIM-RECO 0.432
+  ..
+  ..
+
+Create a file with the name of the SAMPLE for which you want the final plots and efficiency tables
+In this example the file used is:
+  /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/sampleListForMerging.txt
+
+  LQtoUE_M250 Exotica_LQtoUE_M250
+  LQtoUE_M400 Exotica_LQtoUE_M400
+  Z           Zee  ZJets-madgraph
+  QCD         HerwigQCDPt  PYTHIA8PhotonJetPt  QCDDiJetPt
+  TTBAR       TTJets-madgraph
+
+The first name of each row is the name of the SAMPLE (you decide it). 
+The other elements of the row are strings that will be used to find the datasets 
+from the list which must be included in that SAMPLE.
+If at least one of the strings matches with the name of a dataset 
+(i.e. Exotica_LQtoUE_M400 matches with /Exotica_LQtoUE_M400/Summer08_IDEAL_V9_v1/GEN-SIM-RECO)
+, that dataset will be assumed as part of the SAMPLE. Plots and tables from datasets
+associated to the same SAMPLE will be merged (rescaling for cross section).
 
 Two different python scripts are used:
  - combineTablesTemplate.py (for tables)
@@ -182,11 +206,11 @@ Two different python scripts are used:
 
 Produce the tables with:
 
-./scripts/combineTablesTemplate.py -i /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/inputListAllCurrent.txt -c analysisClass_template -d /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/data/output -l 100 -x /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/xsection_pb_default.txt -o /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/data/output
+./scripts/combineTablesTemplate.py -i /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/inputListAllCurrent.txt -c analysisClass_template -d /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/data/output -l 100 -x /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/xsection_pb_default.txt -o /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/data/output -s /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/sampleListForMerging.txt
 
 The output tables with number of selected events and efficiencies for each cut and for each sample are in:
   
-  /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/analysisClass_template_tables.dat	
+  /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/output/analysisClass_template_tables.dat	
 
 ###########################################
 5b) Combine Plots (combinePlotsTemplate.py)
@@ -194,9 +218,39 @@ The output tables with number of selected events and efficiencies for each cut a
 
 Produce the plots with:
 
-./scripts/combinePlotsTemplate.py -i /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/inputListAllCurrent.txt -c analysisClass_template -d /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/data/output -l 100 -x /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/xsection_pb_default.txt -o /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/data/output
+./scripts/combinePlotsTemplate.py -i /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/inputListAllCurrent.txt -c analysisClass_template -d /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/data/output -l 100 -x /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/xsection_pb_default.txt -o /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/data/output -s /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/sampleListForMerging.txt
 
 The output plots (rescaled for the cross section) are in:
   
-  /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/analysisClass_template_plots.root	
+  /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/output/analysisClass_template_plots.root	
 
+
+
+#################################################################
+6) Example of a root macro to produce final plots with nice style
+#################################################################
+
+TO DO... (Francesco working on it)
+
+
+-------------------------------------------------------------
+-------------------------------------------------------------
+-------------------------------------------------------------
+
+Backup
+
+#################################################################
+b1) TO DO list to improve the code
+#################################################################
+
+- For Francesco
+  * .pl and .py scripts: fix the path (modify code so that the full path is not required)
+  * .py scripts: fix the help message (problem when calling PYROOT using the CMSSW python environment variables)
+  * redirect output of "launchAnalysis.pl" on a .log file
+
+- For Paolo
+  * update instructions for rootNtupleAnalyzer
+  * add 5th decimal to effic.
+  * change instructions, always make a symbolic link 
+    (i.e. analysisClass.C -> src/analysisClass_XXX.C or in the directory rootNtupleMacros/src)
+    NOTE: specify dir from where to make the symb link

@@ -11,7 +11,7 @@ import re
 
 #---Option Parser
 #--- TODO: WHY PARSER DOES NOT WORK IN CMSSW ENVIRONMENT? ---#
-usage = "usage: %prog [options] \nExample: \n./combinePlotsTemplate.py -i /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config/inputListAllCurrent.txt -c analysisClass_genStudies -d /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output -l 100 -x /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/xsection_pb_default.txt -o /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output"
+usage = "usage: %prog [options] \nExample: \n./combinePlotsTemplate.py -i /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config/inputListAllCurrent.txt -c analysisClass_genStudies -d /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output -l 100 -x /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/xsection_pb_default.txt -o /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output -s /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config/sampleListForMerging.txt"
 
 parser = OptionParser(usage=usage)
 
@@ -39,31 +39,42 @@ parser.add_option("-o", "--outputDir", dest="outputDir",
                   help="the directory OUTDIR contains the output of the program (full path required)",
                   metavar="OUTDIR")
 
+parser.add_option("-s", "--sampleListForMerging", dest="sampleListForMerging",
+                  help="put in the file SAMPLELIST the name of the sample with the associated strings which should  match with the dataset name (full path required)",
+                  metavar="SAMPLELIST")
+
 (options, args) = parser.parse_args()
 
-if len(sys.argv)<12:
-    print "ERROR: not enough arguments --> ./combinePlotsTemplate.py -h or ./combinePlotsTemplate.py --help for options"
-    sys.exit()
-
-
-if len(sys.argv)<2:
-    print "./combinePlotsTemplate.py -h or ./combinePlotsTemplate.py --help for options"
+if len(sys.argv)<14:
+    print usage
     sys.exit()
 
 #print options.analysisCode
 
 
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%begin
+#---Check if sampleListForMerging file exist
+if(os.path.isfile(options.sampleListForMerging) == False):
+    print "ERROR: file " + options.sampleListForMerging + " not found"
+    print "exiting..."
+    sys.exit()
+
 
 #--- Declare histograms
-dictSamples = {"LQtoUE_M250": ["Exotica_LQtoUE_M250"],
-               "LQtoUE_M400": ["Exotica_LQtoUE_M400"],
-               "Z": ["Zee","ZJets-madgraph"],
-               "QCD": ["HerwigQCDPt","PYTHIA8PhotonJetPt","QCDDiJetPt"],
-               "TTBAR": ["TTJets-madgraph"] }
-dictFinalHisto = {}
+dictSamples = {}
 
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%end
+for l,line in enumerate( open( options.sampleListForMerging ) ):
+    line = string.strip(line,"\n")
+    print line
+    
+    for i,piece in enumerate(line.split()):
+        print "i=", i , "  piece= " , piece
+        if (i == 0):
+            key = piece
+            dictSamples[key] = []
+        else:
+            dictSamples[key].append(piece)
+
+dictFinalHisto = {}
 
 #--- functions
 def UpdateHistograms(name, N, listHisto, inputRootFile, weight, dataset_mod, listNames):
@@ -234,7 +245,7 @@ for n, lin in enumerate( open( options.inputList ) ):
 
 print "\n"
 
-outputTfile = TFile( options.analysisCode + "_plots.root" , "RECREATE")
+outputTfile = TFile( options.outputDir + "/" + options.analysisCode + "_plots.root","RECREATE")
 
 for sample in ( dictFinalHisto ):
     for h, histo in enumerate ( dictFinalHisto[sample] ):
@@ -242,4 +253,5 @@ for sample in ( dictFinalHisto ):
         dictFinalHisto[sample][histo].Write()
 
 outputTfile.Close()
-    
+
+print "output plots at: " + options.outputDir + "/" + options.analysisCode + "_plots.root"
