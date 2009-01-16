@@ -1,5 +1,5 @@
 #Example of file with list of cuts
-#VariableName	      minValue1(<) maxValue1(<=)	minValue1(<)	maxValue1(<=)	level	histoNbinsMinMax
-nEleFinal	      1		   9999999		0		0		0	11 -0.5 10.5
-pT1stEle	      85	   9999999		0	        0	        1	100 0 1000
+#VariableName	      minValue1(<) maxValue1(<=)	minValue2(<)	maxValue2(<=)	level	histoNbinsMinMax
+nEleFinal	      1		   +inf			+inf		-inf		0	11 -0.5 10.5
+pT1stEle	      85	   +inf			+inf	        -inf	        1	100 0 1000
 pT2ndEle	      30	   60			90	        120	        1	100 0 1000

@@ -102,10 +102,24 @@ void baseClass::readCutFile()
 	  vector<string> v = split(s);
 	  // for(vector<string>::size_type i = 0; i != v.size(); ++i){ STDOUT("i, v[i] ="<<i<<", "<<v[i]); }
 	  thisCut.variableName =     v[0];
-	  thisCut.minValue1  = atof( v[1].c_str() );
-	  thisCut.maxValue1  = atof( v[2].c_str() );
-	  thisCut.minValue2  = atof( v[3].c_str() );
-	  thisCut.maxValue2  = atof( v[4].c_str() );
+	  string m1=v[1];
+	  string M1=v[2];
+	  string m2=v[3];
+	  string M2=v[4];
+	  if( m1=="-" || M1=="-" ) 
+	    {
+	      STDOUT("ERROR: minValue1 and maxValue2 have to be provided. Returning."); 
+	      return;
+	    } 
+	  if( m2=="-" && M2!="-" ) 
+	    {
+	      STDOUT("ERROR: if any of minValue2 and maxValue2 is -, then both have to be -. Returning");
+	      return; 
+	    }
+	  thisCut.minValue1  = decodeCutValue( m1 );
+	  thisCut.maxValue1  = decodeCutValue( M1 );
+	  thisCut.minValue2  = decodeCutValue( m2 );
+	  thisCut.maxValue2  = decodeCutValue( M2 );
 	  thisCut.level_int  = atoi( v[5].c_str() );
 	  thisCut.level_str  =       v[5];
 	  thisCut.histoNbins = atoi( v[6].c_str() );
@@ -194,7 +208,7 @@ bool baseClass::evaluateCuts()
        it != orderedCutNames_.end(); it++) 
     {
       cut * c = & (cutName_cut_.find(*it)->second);
-      if( ! ( c->filled && (c->minValue1 < c->value && c->value <= c->maxValue1 || c->minValue2 < c->value && c->value <= c->maxValue2) ) )
+      if( ! ( c->filled && (c->minValue1 < c->value && c->value <= c->maxValue1 || c->minValue2 < c->value && c->value <= c->maxValue2 ) ) )
 	{
           c->passed = false;
           combCutName_passed_[c->level_str.c_str()] = false;
@@ -408,16 +422,18 @@ bool baseClass::writeCutEfficFile()
 
   os << setw(3) << "0"
      << setw(15) << "nocut" 
-     << setw(15) << "-9999999"
-     << setw(15) <<  "9999999"
-     << setw(15) << "-9999999"
-     << setw(15) <<  "9999999"
+     << setprecision(4) 
+     << setw(15) << "-inf"
+     << setw(15) << "+inf"
+     << setw(15) << "-"
+     << setw(15) << "-"
      << setw(15) << nEnt
      << setw(15) << nEnt
-     << setw(15) << "100"
-     << setw(15) << "0"
-     << setw(15) << "100"
-     << setw(15) << "0"
+     << setprecision(5) 
+     << setw(15) << "1.00000"
+     << setw(15) << "0.00000"
+     << setw(15) << "1.00000"
+     << setw(15) << "0.00000"
      << endl;
   for (vector<string>::iterator it = orderedCutNames_.begin(); 
        it != orderedCutNames_.end(); it++) 
@@ -428,14 +444,19 @@ bool baseClass::writeCutEfficFile()
       c->effAbs = (double) c->nEvtPassed / (double) nEnt;
       c->effAbsErr = sqrt( (double) c->effAbs * (1.0 - (double) c->effAbs) / (double) nEnt );
 
+      std::stringstream ssm2,ssM2;
+      ssm2 << fixed << setprecision(4) << c->minValue2;
+      ssM2 << fixed << setprecision(4) << c->maxValue2;
       os << setw(3) << c->id 
 	 << setw(15) << c->variableName 
+	 << setprecision(4) 
 	 << setw(15) << fixed << c->minValue1
-	 << setw(15) << c->maxValue1
-	 << setw(15) << c->minValue2
-	 << setw(15) << c->maxValue2
+	 << setw(15) << c->maxValue1 
+	 << setw(15) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssm2.str() )
+	 << setw(15) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssM2.str() )
 	 << setw(15) << c->nEvtInput
 	 << setw(15) << c->nEvtPassed
+	 << setprecision(5) 
 	 << setw(15) << c->effRel
 	 << setw(15) << c->effRelErr
 	 << setw(15) << c->effAbs
@@ -470,3 +491,22 @@ vector<string> baseClass::split(const string& s)
   return ret;
 }
 
+double baseClass::decodeCutValue(const string& s)
+{
+  STDOUT("s = "<<s);
+  double ret;
+  if( s == "inf" || s == "+inf")
+    {
+       ret = 9999999;
+    }
+  else if ( s == "-inf")
+    {
+       ret = -9999999;
+    }
+  else
+    {
+       ret = atof( s.c_str() );
+    }
+  STDOUT("ret = " << ret);
+  return ret;
+}

@@ -3,6 +3,7 @@
 
 #include "rootNtupleClass.h"
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <map>
@@ -84,6 +85,7 @@ class baseClass : public rootNtupleClass {
   bool baseClass::writeCutEfficFile();
   bool baseClass::sortCuts(const cut&, const cut&);
   vector<string> split(const string& s);
+  double decodeCutValue(const string& s);
 };
 
 #endif
