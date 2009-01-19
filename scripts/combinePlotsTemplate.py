@@ -217,7 +217,7 @@ for n, lin in enumerate( open( options.inputList ) ):
 
             if(n == 0):
                 dictFinalHisto[sample][h] = TH1F()
-                dictFinalHisto[sample][h].SetName("histo_" + sample + "_" + histoName )
+                dictFinalHisto[sample][h].SetName("histo1D__" + sample + "__" + histoName )
                 dictFinalHisto[sample][h].SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax())
 
             #print "current histo is : " , dictFinalHisto[sample][h].GetName()

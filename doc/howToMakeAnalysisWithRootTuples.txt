@@ -187,6 +187,8 @@ In this example the file used is:
   Z           Zee  ZJets-madgraph
   QCD         HerwigQCDPt  PYTHIA8PhotonJetPt  QCDDiJetPt
   TTBAR       TTJets-madgraph
+  QCDTTBAR    HerwigQCDPt  PYTHIA8PhotonJetPt  QCDDiJetPt TTJets-madgraph
+  ALLBKG      Zee  ZJets-madgraph HerwigQCDPt  PYTHIA8PhotonJetPt  QCDDiJetPt TTJets-madgraph
 
 The first name of each row is the name of the SAMPLE (you decide it). 
 The other elements of the row are strings that will be used to find the datasets 
@@ -225,13 +227,46 @@ The output plots (rescaled for the cross section) are in:
   /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/output/analysisClass_template_plots.root	
 
 
-
 #################################################################
 6) Example of a root macro to produce final plots with nice style
 #################################################################
 
-TO DO... (Francesco working on it)
+An example of macro to produce a final plot with overlaid histograms 
+(one for each sample), legend and x/y axis titles can be found at:
 
+test/makeStackHistoTemplate.py
+
+To run it:
+  cd test	
+  ./makeStackHistoTemplate.py -i ../data/output/analysisClass_template_plots.root -n cutHisto_allPreviousCuts__pT1stEle -x pT_1st_ele_\(GeV\) -y number_of_entries
+
+NOTE: in ../data/output/analysisClass_template_plots.root you will find these files:
+
+  ...
+  KEY: TH1F     histo1D__TTBAR__cutHisto_noCuts___________nEleFinal;1
+  KEY: TH1F     histo1D__TTBAR__cutHisto_allPreviousCuts__nEleFinal;1
+  KEY: TH1F     histo1D__TTBAR__cutHisto_allOthrSmLvlCuts_nEleFinal;1
+  KEY: TH1F     histo1D__TTBAR__cutHisto_allOtherCuts_____nEleFinal;1
+  KEY: TH1F     histo1D__TTBAR__cutHisto_allCuts__________nEleFinal;1
+  KEY: TH1F     histo1D__TTBAR__cutHisto_noCuts___________pT1stEle;1
+  KEY: TH1F     histo1D__TTBAR__cutHisto_allPreviousCuts__pT1stEle;1
+  ...
+
+As you can see the format is histo1D__SAMPLE__OriginalHistoname (;1 is just a print out from ROOT)
+
+OriginalHistoname is the argument to be passed with "-n" to the script, 
+i.e. in this example: cutHisto_allPreviousCuts__pT1stEle
+
+Outputs are in the current directory:
+  
+  - makeStackHistoTemplate_cutHisto_allPreviousCuts__pT1stEle.root 
+  - stack_cutHisto_allPreviousCuts__pT1stEle.gif 
+  - stack_cutHisto_allPreviousCuts__pT1stEle.eps
+
+NOTE: this is just an example and can be improved or modified for 
+different purpose. This macro is not completely automatized 
+like the rest of the scripts in this tutorial. The code needs to 
+be edited by the user depending on the different cases.
 
 -------------------------------------------------------------
 -------------------------------------------------------------
@@ -248,6 +283,7 @@ b1) TO DO list to improve the code
   * .py scripts: fix the help message (problem when calling PYROOT using the CMSSW python environment variables)
   * redirect output of "launchAnalysis.pl" on a .log file
   * combineTablesTemplate.py: use the values of min1,max1,min2,max2 provided by Paolo's code
+  * combinePlotsTemplate.py: add check for 2d histograms
 
 - For Paolo
   * update instructions for rootNtupleAnalyzer
