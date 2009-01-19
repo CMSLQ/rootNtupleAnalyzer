@@ -54,13 +54,17 @@ class baseClass : public rootNtupleClass {
   public :
   map<string, bool> combCutName_passed_;
 
-  bool baseClass::resetCuts();
-  bool fillVariableWithValue(const std::string&, const double&);
-  bool baseClass::evaluateCuts();
+  void baseClass::resetCuts();
+  void fillVariableWithValue(const std::string&, const double&);
+  void baseClass::evaluateCuts();
   bool baseClass::passedCut(const string& s);
   bool baseClass::passedAllPreviousCuts(const string& s);
   bool baseClass::passedAllOtherCuts(const string& s);
   bool baseClass::passedAllOtherSameLevelCuts(const string& s);
+  double baseClass::getCutMinValue1(const string& s);
+  double baseClass::getCutMaxValue1(const string& s);
+  double baseClass::getCutMinValue2(const string& s);
+  double baseClass::getCutMaxValue2(const string& s);
 
   baseClass(string * inputList, string * cutFile, string * treeName, TString *outputFileName=0, string * cutEfficFile=0);
   virtual ~baseClass();
@@ -74,6 +78,7 @@ class baseClass : public rootNtupleClass {
   string * treeName_; // Name of input tree objects in (.root) files
   TTree * tree_;
   string * cutEfficFile_;
+  map<string, cut> preCutName_cut_;
   map<string, cut> cutName_cut_;
   vector<string> orderedCutNames_; 
   void baseClass::init();

@@ -1,5 +1,14 @@
 #Example of file with list of cuts
+#
+#--------------------------------- Preliminary Cuts (level -1) here below --------------------------------------
+#VariableName	      minValue1	   maxValue1		minValue2	maxValue2	level	histoNbinsMinMax
+#------------	      ---------	   ---------		---------	---------	-----	----------------
+eleFidRegion	      0.	   2.5			-		-		-1	- - - 
+#
+#--------------------------------- Cuts (level 0,1,2,3 ... n) here below ---------------------------------------
 #VariableName	      minValue1(<) maxValue1(<=)	minValue2(<)	maxValue2(<=)	level	histoNbinsMinMax
-nEleFinal	      1		   +inf			+inf		-inf		0	11 -0.5 10.5
-pT1stEle	      85	   +inf			+inf	        -inf	        1	100 0 1000
-pT2ndEle	      30	   60			90	        120	        1	100 0 1000
+#------------	      ------------ -------------	------------	-------------	-----	----------------
+nEleFinal	      1		   +inf			-		-		0	11 -0.5 10.5
+pT1stEle	      85	   +inf			-	        -	        1	100 0 1000
+pT2ndEle	      30	   +inf			-	        -	        1	100 0 1000
+invMass_ee	      0		   80			100	        +inf	        1	120 0 1200

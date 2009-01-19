@@ -31,7 +31,8 @@ void analysisClass::Loop()
    
    //////////book histos here
 
-#ifdef USE_EXAMPLE   
+#ifdef USE_EXAMPLE
+   STDOUT("WARNING: using example code. In order NOT to use it, comment line that defines USE_EXAMPLE flag in Makefile.");   
    // number of electrons
    TH1F *h_nEleFinal = new TH1F ("h_nEleFinal","",11,-0.5,10.5);
    h_nEleFinal->Sumw2();
@@ -70,60 +71,38 @@ void analysisClass::Loop()
        {
 	 // ECAL barrel fiducial region
 	 bool pass_ECAL_FR=false;
-	 if( fabs(eleEta[iele]) < 1.4 )	v_idx_ele_final.push_back(iele);
+	 if( fabs(eleEta[iele]) < getCutMaxValue1("eleFidRegion") )	v_idx_ele_final.push_back(iele);
        }     
 
      // Set the evaluation of the cuts to false and clear the map variableName_value_
-     if( !resetCuts() ) 
-       {
-	 STDOUT("ERROR: resetCuts() did not complete successfully. Returning.");
-	 return;
-       }
-
+     resetCuts();
+     
      // Set the value of the variableNames listed in the cutFile to their current value
-     //variableName_value_["nEleFinal"] = v_idx_ele_final.size();
-     if ( !fillVariableWithValue("nEleFinal", v_idx_ele_final.size()) )
-       {
-	 STDOUT("ERROR: fillVariableWithValue() did not complete successfully. Returning.");
-	 return;
-       }
+     fillVariableWithValue("nEleFinal", v_idx_ele_final.size()) ;
      if( v_idx_ele_final.size() >= 1 ) 
        {
-	 //variableName_value_["pT1stEle"] = elePt[v_idx_ele_final[0]];
-	 if ( !fillVariableWithValue( "pT1stEle", elePt[v_idx_ele_final[0]] ) )
-	   {
-	     STDOUT("ERROR: fillVariableWithValue() did not complete successfully. Returning.");
-	     return;
-	   }	
+	 fillVariableWithValue( "pT1stEle", elePt[v_idx_ele_final[0]] );
        }
      if( v_idx_ele_final.size() >= 2 ) 
        {
-	 //variableName_value_["pT2ndEle"] = elePt[v_idx_ele_final[1]];
-	 if ( !fillVariableWithValue( "pT2ndEle", elePt[v_idx_ele_final[1]]) )
-	   {
-	     STDOUT("ERROR: fillVariableWithValue() did not complete successfully. Returning.");
-	     return;
-	   }	
+	 fillVariableWithValue( "pT2ndEle", elePt[v_idx_ele_final[1]] );
+	 // Calculate Mee
+	 TLorentzVector v_ee, ele1, ele2;
+	 ele1.SetPtEtaPhiM(elePt[v_idx_ele_final[0]],eleEta[v_idx_ele_final[0]],elePhi[v_idx_ele_final[0]],0);
+	 ele2.SetPtEtaPhiM(elePt[v_idx_ele_final[1]],eleEta[v_idx_ele_final[1]],elePhi[v_idx_ele_final[1]],0);
+	 v_ee = ele1 + ele2;
+	 fillVariableWithValue( "invMass_ee", v_ee.M() ) ;
        }
-
-     //for (map<string, double>::iterator it = variableName_value_.begin(); it != variableName_value_.end(); it++) STDOUT("variableName_value_ = "<<it->first<<", "<<it->second)
 
      // Evaluate cuts (but do not apply them)
-     if( !evaluateCuts() )
-       {
-	 STDOUT("ERROR: evaluateCuts did not complete successfully. Returning.");
-	 return;
-       }
-
+     evaluateCuts();
+     
      // Fill histograms and do analysis based on cut evaluation
      h_nEleFinal->Fill(v_idx_ele_final.size());
-     if( v_idx_ele_final.size()>=1 ) h_pT1stEle->Fill(elePt[v_idx_ele_final[0]]);
-     if( v_idx_ele_final.size()>=2 && (elePt[v_idx_ele_final[0]])>85 ) h_pT2ndEle->Fill(elePt[v_idx_ele_final[1]]);
-     //     if( v_idx_ele_final.size()>=2 && (elePt[v_idx_ele_final[0]])>85 && (elePt[v_idx_ele_final[1]])>30) h_pT2ndEle->Fill(elePt[v_idx_ele_final[1]]);
-
-
-     //     if( passedCut("pT1stEle") ) h_pT1stEle->Fill(elePt[v_idx_ele_final[0]]);
-     //     if( passedCut("pT2ndEle") ) h_pT2ndEle->Fill(elePt[v_idx_ele_final[1]]);
+     //if( v_idx_ele_final.size()>=1 ) h_pT1stEle->Fill(elePt[v_idx_ele_final[0]]);
+     //if( v_idx_ele_final.size()>=2 && (elePt[v_idx_ele_final[0]])>85 ) h_pT2ndEle->Fill(elePt[v_idx_ele_final[1]]);
+     if( passedCut("pT1stEle") ) h_pT1stEle->Fill(elePt[v_idx_ele_final[0]]);
+     if( passedCut("pT2ndEle") ) h_pT2ndEle->Fill(elePt[v_idx_ele_final[1]]);
      
      // reject events that did not pass level 0 cuts
      if( !passedCut("0") ) continue;
@@ -147,6 +126,7 @@ void analysisClass::Loop()
    //////////write histos 
 
 #ifdef USE_EXAMPLE
+   STDOUT("WARNING: using example code. In order NOT to use it, comment line that defines USE_EXAMPLE flag in Makefile.");   
    h_nEleFinal->Write();
    h_pT1stEle->Write();
    h_pT2ndEle->Write();

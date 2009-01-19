@@ -109,13 +109,15 @@ void baseClass::readCutFile()
 	  if( m1=="-" || M1=="-" ) 
 	    {
 	      STDOUT("ERROR: minValue1 and maxValue2 have to be provided. Returning."); 
-	      return;
+	      return; // FIXME implement exception
 	    } 
-	  if( m2=="-" && M2!="-" ) 
+	  if( (m2=="-" && M2!="-") || (m2!="-" && M2=="-") ) 
 	    {
 	      STDOUT("ERROR: if any of minValue2 and maxValue2 is -, then both have to be -. Returning");
-	      return; 
+	      return; // FIXME implement exception
 	    }
+	  if( m2=="-") m2="+inf";
+	  if( M2=="-") M2="-inf";
 	  thisCut.minValue1  = decodeCutValue( m1 );
 	  thisCut.maxValue1  = decodeCutValue( M1 );
 	  thisCut.minValue2  = decodeCutValue( m2 );
@@ -153,9 +155,16 @@ void baseClass::readCutFile()
 	  thisCut.effAbs=0;
 	  thisCut.effAbsErr=0;
 
-	  orderedCutNames_.push_back(thisCut.variableName);
-	  cutName_cut_[thisCut.variableName]=thisCut;
-        }
+	  if(thisCut.level_int == -1)
+	    {
+	      preCutName_cut_[thisCut.variableName]=thisCut;
+	    } 
+	  else
+	    {
+	      orderedCutNames_.push_back(thisCut.variableName);
+	      cutName_cut_[thisCut.variableName]=thisCut;
+	    }   
+	}
       cout << "baseClass::readCutFile: Finished reading cutFile: " << *cutFile_ << endl;
     }
   else
@@ -167,9 +176,8 @@ void baseClass::readCutFile()
 
 }
 
-bool baseClass::resetCuts()
+void baseClass::resetCuts()
 {
-  bool ret=true;
   for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++) 
     {
       cut * c = & (cc->second);
@@ -178,17 +186,16 @@ bool baseClass::resetCuts()
       c->passed = false;
     }
   combCutName_passed_.clear();
-  return ret;
+  return;
 }
 
-bool baseClass::fillVariableWithValue(const string& s, const double& d)
+void baseClass::fillVariableWithValue(const string& s, const double& d)
 {
-  bool ret = true;
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
     {
       STDOUT("variableName = "<< s << "not found in cutName_cut_.");
-      return false;
+      return;
     } 
   else
     {
@@ -196,12 +203,11 @@ bool baseClass::fillVariableWithValue(const string& s, const double& d)
       c->filled = true;
       c->value = d;
     }
-  return ret;
+  return;
 }
 
-bool baseClass::evaluateCuts()
+void baseClass::evaluateCuts()
 {
-  bool ret = true;
   //  resetCuts();
   combCutName_passed_.clear();
   for (vector<string>::iterator it = orderedCutNames_.begin(); 
@@ -223,33 +229,18 @@ bool baseClass::evaluateCuts()
 	  combCutName_passed_["all"] = (ap==combCutName_passed_.end()?true:ap->second);
 	}
     }
-  //for(map<string, bool>::iterator cp=combCutName_passed_.begin(); cp !=combCutName_passed_.end(); cp++) STDOUT("combCutName_passed_ = "<<cp->first<<", "<<cp->second);
-
-//   STDOUT("-------");
-//   for (vector<string>::iterator it = orderedCutNames_.begin(); 
-//        it != orderedCutNames_.end(); it++) 
-//     {
-//       cut * c = & (cutName_cut_.find(*it)->second);
-//       STDOUT("variableName filled value passed = "<<c->variableName<<" "<<c->filled<<" "<<c->value<<" "<<c->passed);
-//       STDOUT("passedAllPreviousCuts = "<<passedAllPreviousCuts(c->variableName));
-//       STDOUT("passedCut = "<<passedCut(c->variableName));
-//     }
-
-
 
   if( !fillCutHistos() )
     {
       STDOUT("ERROR: fillCutHistos did not complete successfully.");
-      ret = false;
     }
 
   if( !updateCutEffic() )
     {
       STDOUT("ERROR: updateCutEffic did not complete successfully.");
-      ret = false;
     }
 
-  return ret;
+  return ;
 }
 
 bool baseClass::passedCut(const string& s)
@@ -357,6 +348,70 @@ bool baseClass::passedAllOtherSameLevelCuts(const string& s)
   return ret;
 }
 
+double baseClass::getCutMinValue1(const string& s)
+{
+  double ret;
+  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  if( cc == cutName_cut_.end() ) 
+    {
+      cc = preCutName_cut_.find(s);
+      if( cc == preCutName_cut_.end() ) 
+	{
+	  STDOUT("ERROR: did not find variableName = "<<s<<" neither in cutName_cut_ nor in preCutName_cut_. Returning");
+	}
+    }
+  cut * c = & (cc->second);
+  return (c->minValue1);
+}
+
+double baseClass::getCutMaxValue1(const string& s)
+{
+  double ret;
+  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  if( cc == cutName_cut_.end() ) 
+    {
+      cc = preCutName_cut_.find(s);
+      if( cc == preCutName_cut_.end() ) 
+	{
+	  STDOUT("ERROR: did not find variableName = "<<s<<" neither in cutName_cut_ nor in preCutName_cut_. Returning");
+	}
+    }
+  cut * c = & (cc->second);
+  return (c->maxValue1);
+}
+
+double baseClass::getCutMinValue2(const string& s)
+{
+  double ret;
+  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  if( cc == cutName_cut_.end() ) 
+    {
+      cc = preCutName_cut_.find(s);
+      if( cc == preCutName_cut_.end() ) 
+	{
+	  STDOUT("ERROR: did not find variableName = "<<s<<" neither in cutName_cut_ nor in preCutName_cut_. Returning");
+	}
+    }
+  cut * c = & (cc->second);
+  return (c->minValue2);
+}
+
+double baseClass::getCutMaxValue2(const string& s)
+{
+  double ret;
+  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  if( cc == cutName_cut_.end() ) 
+    {
+      cc = preCutName_cut_.find(s);
+      if( cc == preCutName_cut_.end() ) 
+	{
+	  STDOUT("ERROR: did not find variableName = "<<s<<" neither in cutName_cut_ nor in preCutName_cut_. Returning");
+	}
+    }
+  cut * c = & (cc->second);
+  return (c->maxValue2);
+}
+
 bool baseClass::fillCutHistos()
 {
   bool ret = true;
@@ -444,14 +499,31 @@ bool baseClass::writeCutEfficFile()
       c->effAbs = (double) c->nEvtPassed / (double) nEnt;
       c->effAbsErr = sqrt( (double) c->effAbs * (1.0 - (double) c->effAbs) / (double) nEnt );
 
-      std::stringstream ssm2,ssM2;
-      ssm2 << fixed << setprecision(4) << c->minValue2;
-      ssM2 << fixed << setprecision(4) << c->maxValue2;
+      std::stringstream ssm1, ssM1, ssm2,ssM2;
+      ssm1 << fixed << setprecision(4) << c->minValue1;
+      ssM1 << fixed << setprecision(4) << c->maxValue1;
+      if(c->minValue2 == -9999999) 
+	{
+	  ssm2 << "-inf";
+	}
+      else
+	{
+	  ssm2 << fixed << setprecision(4) << c->minValue2;
+	}
+      if(c->maxValue2 ==  9999999) 
+	{
+	  ssM2 << "+inf";
+	}
+      else
+	{
+	  ssM2 << fixed << setprecision(4) << c->maxValue2;
+	}
       os << setw(3) << c->id 
 	 << setw(15) << c->variableName 
-	 << setprecision(4) 
-	 << setw(15) << fixed << c->minValue1
-	 << setw(15) << c->maxValue1 
+	 << setprecision(4)
+	 << fixed 
+	 << setw(15) << ( ( c->minValue1 == -9999999.0 ) ? "-inf" : ssm1.str() )
+	 << setw(15) << ( ( c->maxValue1 ==  9999999.0 ) ? "+inf" : ssM1.str() )
 	 << setw(15) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssm2.str() )
 	 << setw(15) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssM2.str() )
 	 << setw(15) << c->nEvtInput
@@ -493,9 +565,9 @@ vector<string> baseClass::split(const string& s)
 
 double baseClass::decodeCutValue(const string& s)
 {
-  STDOUT("s = "<<s);
+  //STDOUT("s = "<<s);
   double ret;
-  if( s == "inf" || s == "+inf")
+  if( s == "inf" || s == "+inf" )
     {
        ret = 9999999;
     }
@@ -507,6 +579,6 @@ double baseClass::decodeCutValue(const string& s)
     {
        ret = atof( s.c_str() );
     }
-  STDOUT("ret = " << ret);
+  //STDOUT("ret = " << ret);
   return ret;
 }
