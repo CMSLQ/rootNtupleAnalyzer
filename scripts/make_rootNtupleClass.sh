@@ -4,7 +4,7 @@ usage ()
 {
         echo "Usage:   $0 -f rootFile -t TTreeName "
         echo "where:   rootFile is the input root file and TTreeName is the name of the TTree to be analyzed"
-        echo "Example: $0 -f data/input/LQ1stgenM400_full167_100pbScenario.root -t RootNtupleMaker"
+        echo "Example: $0 -f data/input/Exotica_LQtoUE_M250__Summer08_IDEAL_V9_v1__GEN-SIM-RECO_1.root -t RootTupleMaker"
         exit 1;
 }
 
