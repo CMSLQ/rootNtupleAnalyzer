@@ -21,7 +21,7 @@ The user's code should be placed in the method Loop() of analysisClass, which re
 the method Loop() of rootNtupleClass. 
 
 The main program (src/main.C) receives the configuration parameters (such a the input 
-chain of root files) and executes the analysisClass code.
+chain of root files and a file to provide a cut list) and executes the analysisClass code.
 
 Instructions:
 -------------
@@ -35,14 +35,16 @@ Instructions:
    ./scripts/make_rootNtupleClass.sh   
       (you will be asked for input arguments)
 
-3) Copy analysisClass_template.C to analysisClass.C by:
-   cp -i src/analysisClass_template.C src/analysisClass.C
+3) Copy the analysis template file into your own file:
+     cp -i src/analysisClass_template.C src/analysisClass_myCode.C
+   and make a symbolic link analysisClass.C by:
+     ln -s analysisClass_myCode.C src/analysisClass.C
    
 4) Compile to test that all is OK so far (in order to compile, steps 2 and 3 need to be done first):
    make clean
    make
 
-5) Add your analysis code to the method Loop() of analysisClass.C
+5) Add your analysis code to the method Loop() of analysisClass_myCode.C
 
 6) Compile as in 4.
 
@@ -50,15 +52,13 @@ Instructions:
    ./main 
       (you will be asked for input arguments)
 
-
 Note1: 
-  in order to have several analyses in this directory, one can
-    mv -i src/analysisClass.C src/analysisClass_ONE.C
-    ln -sf analysisClass_ONE.C src/analysisClass.C 
-  and compile/run as above.
-  A second analysis would then go into a file src/analysisClass_TWO.C
-  then do
-    ln -sf analysisClass_TWO.C src/analysisClass.C 
+  one can have several analyses in a directory, such as
+    src/analysisClass_myCode1.C
+    src/analysisClass_myCode2.C
+    src/analysisClass_myCode3.C
+  and move the symbolic link to the one to be used:
+    ln -sf analysisClass_myCode2.C src/analysisClass.C 
   and compile/run as above.
 
 Note2: 
@@ -67,13 +67,70 @@ Note2:
   http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/Leptoquarks/rootNtupleMacros/src/
   This will allow to separate the developments of the rootNtupleAnalyzer package
   and the developments of the analysis macros.
-  In order to compile and run an analysis macro named analysisClass_XXX.C and stored 
-  in a directory  /...fullPath.../rootNtupleMacros/src/, do:
+  In order to compile and run an analysis macro
+    /...fullPath.../rootNtupleMacros/src/analysisClass_XXX.C
+  do:
     ln -sf /...fullPath.../rootNtupleMacros/src/analysisClass_XXX.C src/analysisClass.C
   and compile/run as above.
 
+More details:
+-------------
 
-Additional scripts:
+- Example code:
+The src/analysisClass_template.C comes with simple example code. The example code in enclosed by
+  #ifdef USE_EXAMPLE
+    ... code ...
+  #endif //end of USE_EXAMPLE
+The code is NOT compiled by default. In order to compile it, uncomment the line 
+  #FLAGS += -DUSE_EXAMPLE
+in the Makefile. 
+
+- Providing cuts via file:
+A list of cut variable names and cut limits can be provided through a file (see config/cutFileExample.txt).
+The variable names in such a file have to be filled with a value calculated by the user analysisClass code,
+a function "fillVariableWithValue" is provided - see example code.
+Once all the cut variables have been filled, the cuts can be evaluated by calling "evaluateCuts" - see 
+example code. Do not forget to reset the cuts by calling "resetCuts" at each event before filling the 
+variables - see example code.
+The function "evaluateCuts" determines whether the cuts are satisfied or not, stores the pass/failed result
+of each cut, calculates cut efficiencies and fills histograms for each cut variable (binning provided by the
+cut file, see config/cutFileExample.txt).
+The user has access to the cut results via a set of functions (see include/baseClass.h)
+  bool baseClass::passedCut(const string& s);
+  bool baseClass::passedAllPreviousCuts(const string& s);
+  bool baseClass::passedAllOtherCuts(const string& s);
+where the string to be passed is the cut variable name.
+The cuts are evaluated following the order of their apperance in the cut file (config/cutFileExample.txt).
+One can simply change the sequnce of line in the cut file to have the cuts applied in a different order
+and do cut efficiency studies.
+Also, the user can assign to each cut a level (0,1,2,3,4 ... n) and use a function
+  bool baseClass::passedAllOtherSameLevelCuts(const string& s);
+to have the pass/failed info on all other cuts with the same level.
+There is actually also cuts with level=-1. These cuts are not actually evaluated, the corresponding lines 
+in the cut file (config/cutFileExample.txt) are used to pass values to the user code (such as fiducial 
+region limits). The user can access these values (and also those of the cuts with level >= 0) by
+  double baseClass::getCutMinValue1(const string& s);
+  double baseClass::getCutMaxValue1(const string& s);
+  double baseClass::getCutMinValue2(const string& s);
+  double baseClass::getCutMaxValue2(const string& s);
+
+- Automatic histograms for cuts
+In the output root file the following histograms are generated for each cut variable with level >= 0:
+  no cuts applied
+  passedAllPreviousCuts 
+  passedAllOtherSameLevelCuts
+  passedAllOtherCuts
+  passedAllCut
+
+- Automatic cut efficiency:
+the absolute and relative efficiency is calculated for each cut and stored in an output file
+(named data/output/cutEfficiencyFile.dat if the code is executed following the examples)
+
+
+
+
+Additional scripts for running on several datasets:
+---------------------------------------------------
 
   script/createList.pl: it creates a .txt list of .root input files to be used as input for the analysis
   script/launchAnalysis.pl: it launches the analysis jobs for all the lists created by "script/createList.pl";  the output are two files .root and .dat with plots and tables respectively
