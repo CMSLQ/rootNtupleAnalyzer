@@ -1,6 +1,6 @@
 COMP=c++ 
 FLAGS = 
-FLAGS += -DUSE_EXAMPLE 
+#FLAGS += -DUSE_EXAMPLE 
 ROOTLIBS = `root-config --glibs --cflags` -lMinuit 
 INC= -I.. -I. -I./include  -I${CLHEP}/include 
 ROOTINC= -I${ROOTSYS}/include
