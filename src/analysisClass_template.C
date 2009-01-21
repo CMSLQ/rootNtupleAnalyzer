@@ -71,10 +71,10 @@ void analysisClass::Loop()
        {
 	 // ECAL barrel fiducial region
 	 bool pass_ECAL_FR=false;
-	 if( fabs(eleEta[iele]) < getCutMaxValue1("eleFidRegion") )	v_idx_ele_final.push_back(iele);
+	 if( fabs(eleEta[iele]) < getPreCutValue1("eleFidRegion") )	v_idx_ele_final.push_back(iele);
        }     
 
-     // Set the evaluation of the cuts to false and clear the map variableName_value_
+     // Set the evaluation of the cuts to false and clear the variable values and filled status
      resetCuts();
      
      // Set the value of the variableNames listed in the cutFile to their current value

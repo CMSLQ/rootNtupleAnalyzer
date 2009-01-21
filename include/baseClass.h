@@ -25,7 +25,6 @@ struct cut {
   double maxValue1;
   double minValue2;
   double maxValue2;
-  //  double resetValue;
   int level_int;
   string level_str;
   int histoNbins;
@@ -44,10 +43,16 @@ struct cut {
   bool passed;
   int nEvtInput;
   int nEvtPassed;
-  double effRel;
-  double effRelErr;
-  double effAbs;
-  double effAbsErr;
+};
+
+struct preCut {
+  string variableName;
+  double value1;
+  double value2;
+  double value3;
+  double value4;
+  int level_int;
+  string level_str;
 };
 
 class baseClass : public rootNtupleClass {
@@ -60,7 +65,11 @@ class baseClass : public rootNtupleClass {
   bool baseClass::passedCut(const string& s);
   bool baseClass::passedAllPreviousCuts(const string& s);
   bool baseClass::passedAllOtherCuts(const string& s);
-  bool baseClass::passedAllOtherSameLevelCuts(const string& s);
+  bool baseClass::passedAllOtherSameAndLowerLevelCuts(const string& s);
+  double baseClass::getPreCutValue1(const string& s);
+  double baseClass::getPreCutValue2(const string& s);
+  double baseClass::getPreCutValue3(const string& s);
+  double baseClass::getPreCutValue4(const string& s);
   double baseClass::getCutMinValue1(const string& s);
   double baseClass::getCutMaxValue1(const string& s);
   double baseClass::getCutMinValue2(const string& s);
@@ -78,7 +87,7 @@ class baseClass : public rootNtupleClass {
   string * treeName_; // Name of input tree objects in (.root) files
   TTree * tree_;
   string * cutEfficFile_;
-  map<string, cut> preCutName_cut_;
+  map<string, preCut> preCutName_cut_;
   map<string, cut> cutName_cut_;
   vector<string> orderedCutNames_; 
   void baseClass::init();

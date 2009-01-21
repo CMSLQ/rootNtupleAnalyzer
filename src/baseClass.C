@@ -98,9 +98,20 @@ void baseClass::readCutFile()
         {
           STDOUT("read line: " << s);
           if (s[0] == '#') continue;
-	  cut thisCut;
 	  vector<string> v = split(s);
-	  // for(vector<string>::size_type i = 0; i != v.size(); ++i){ STDOUT("i, v[i] ="<<i<<", "<<v[i]); }
+	  int level_int = atoi( v[5].c_str() );
+	  if(level_int == -1)
+	    {
+	      preCut thisPreCut;
+	      thisPreCut.variableName =     v[0];
+	      thisPreCut.value1  = decodeCutValue( v[1] );
+	      thisPreCut.value2  = decodeCutValue( v[2] );
+	      thisPreCut.value3  = decodeCutValue( v[3] );
+	      thisPreCut.value4  = decodeCutValue( v[4] );
+	      preCutName_cut_[thisPreCut.variableName]=thisPreCut;
+	      continue;
+	    }
+	  cut thisCut;
 	  thisCut.variableName =     v[0];
 	  string m1=v[1];
 	  string M1=v[2];
@@ -122,18 +133,18 @@ void baseClass::readCutFile()
 	  thisCut.maxValue1  = decodeCutValue( M1 );
 	  thisCut.minValue2  = decodeCutValue( m2 );
 	  thisCut.maxValue2  = decodeCutValue( M2 );
-	  thisCut.level_int  = atoi( v[5].c_str() );
+	  thisCut.level_int  = level_int;
 	  thisCut.level_str  =       v[5];
 	  thisCut.histoNbins = atoi( v[6].c_str() );
 	  thisCut.histoMin   = atof( v[7].c_str() );
 	  thisCut.histoMax   = atof( v[8].c_str() );
 	  // Not filled from file
 	  thisCut.id=++id;
-	  string s1 = "cutHisto_noCuts___________" + thisCut.variableName;
-	  string s2 = "cutHisto_allPreviousCuts__" + thisCut.variableName;
-	  string s3 = "cutHisto_allOthrSmLvlCuts_" + thisCut.variableName;
-	  string s4 = "cutHisto_allOtherCuts_____" + thisCut.variableName;
-	  string s5 = "cutHisto_allCuts__________" + thisCut.variableName;
+	  string s1 = "cutHisto_noCuts_________________" + thisCut.variableName;
+	  string s2 = "cutHisto_allPreviousCuts________" + thisCut.variableName;
+	  string s3 = "cutHisto_allOthrSmAndLwrLvlCuts_" + thisCut.variableName;
+	  string s4 = "cutHisto_allOtherCuts___________" + thisCut.variableName;
+	  string s5 = "cutHisto_allCuts________________" + thisCut.variableName;
 	  thisCut.histo1 = TH1F (s1.c_str(),"", thisCut.histoNbins, thisCut.histoMin, thisCut.histoMax);
 	  thisCut.histo2 = TH1F (s2.c_str(),"", thisCut.histoNbins, thisCut.histoMin, thisCut.histoMax);
 	  thisCut.histo3 = TH1F (s3.c_str(),"", thisCut.histoNbins, thisCut.histoMin, thisCut.histoMax);
@@ -150,20 +161,10 @@ void baseClass::readCutFile()
 	  thisCut.passed = false;
 	  thisCut.nEvtInput=0;
 	  thisCut.nEvtPassed=0;
-	  thisCut.effRel=0;
-	  thisCut.effRelErr=0;
-	  thisCut.effAbs=0;
-	  thisCut.effAbsErr=0;
 
-	  if(thisCut.level_int == -1)
-	    {
-	      preCutName_cut_[thisCut.variableName]=thisCut;
-	    } 
-	  else
-	    {
-	      orderedCutNames_.push_back(thisCut.variableName);
-	      cutName_cut_[thisCut.variableName]=thisCut;
-	    }   
+	  orderedCutNames_.push_back(thisCut.variableName);
+	  cutName_cut_[thisCut.variableName]=thisCut;
+
 	}
       cout << "baseClass::readCutFile: Finished reading cutFile: " << *cutFile_ << endl;
     }
@@ -317,7 +318,7 @@ bool baseClass::passedAllOtherCuts(const string& s)
   return ret;
 }
 
-bool baseClass::passedAllOtherSameLevelCuts(const string& s)
+bool baseClass::passedAllOtherSameAndLowerLevelCuts(const string& s)
 {
   //STDOUT("Examining variableName = "<<s);
   bool ret = true;
@@ -348,17 +349,66 @@ bool baseClass::passedAllOtherSameLevelCuts(const string& s)
   return ret;
 }
 
+double baseClass::getPreCutValue1(const string& s)
+{
+  double ret;
+  map<string, preCut>::iterator cc = preCutName_cut_.find(s);
+  if( cc == preCutName_cut_.end() ) 
+    {
+      STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
+    }
+  preCut * c = & (cc->second);
+  if(c->value1 == -9999999) STDOUT("ERROR: value1 of preliminary cut "<<s<<" was not provided.");
+  return (c->value1);
+}
+
+double baseClass::getPreCutValue2(const string& s)
+{
+  double ret;
+  map<string, preCut>::iterator cc = preCutName_cut_.find(s);
+  if( cc == preCutName_cut_.end() ) 
+    {
+      STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
+    }
+  preCut * c = & (cc->second);
+  if(c->value2 == -9999999) STDOUT("ERROR: value2 of preliminary cut "<<s<<" was not provided.");
+  return (c->value2);
+}
+
+double baseClass::getPreCutValue3(const string& s)
+{
+  double ret;
+  map<string, preCut>::iterator cc = preCutName_cut_.find(s);
+  if( cc == preCutName_cut_.end() ) 
+    {
+      STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
+    }
+  preCut * c = & (cc->second);
+  if(c->value3 == -9999999) STDOUT("ERROR: value3 of preliminary cut "<<s<<" was not provided.");
+  return (c->value3);
+}
+
+double baseClass::getPreCutValue4(const string& s)
+{
+  double ret;
+  map<string, preCut>::iterator cc = preCutName_cut_.find(s);
+  if( cc == preCutName_cut_.end() ) 
+    {
+      STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
+    }
+  preCut * c = & (cc->second);
+  if(c->value4 == -9999999) STDOUT("ERROR: value4 of preliminary cut "<<s<<" was not provided.");
+  return (c->value4);
+}
+
+
 double baseClass::getCutMinValue1(const string& s)
 {
   double ret;
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() ) 
     {
-      cc = preCutName_cut_.find(s);
-      if( cc == preCutName_cut_.end() ) 
-	{
-	  STDOUT("ERROR: did not find variableName = "<<s<<" neither in cutName_cut_ nor in preCutName_cut_. Returning");
-	}
+      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
     }
   cut * c = & (cc->second);
   return (c->minValue1);
@@ -370,11 +420,7 @@ double baseClass::getCutMaxValue1(const string& s)
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() ) 
     {
-      cc = preCutName_cut_.find(s);
-      if( cc == preCutName_cut_.end() ) 
-	{
-	  STDOUT("ERROR: did not find variableName = "<<s<<" neither in cutName_cut_ nor in preCutName_cut_. Returning");
-	}
+      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
     }
   cut * c = & (cc->second);
   return (c->maxValue1);
@@ -386,11 +432,7 @@ double baseClass::getCutMinValue2(const string& s)
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() ) 
     {
-      cc = preCutName_cut_.find(s);
-      if( cc == preCutName_cut_.end() ) 
-	{
-	  STDOUT("ERROR: did not find variableName = "<<s<<" neither in cutName_cut_ nor in preCutName_cut_. Returning");
-	}
+      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
     }
   cut * c = & (cc->second);
   return (c->minValue2);
@@ -402,11 +444,7 @@ double baseClass::getCutMaxValue2(const string& s)
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() ) 
     {
-      cc = preCutName_cut_.find(s);
-      if( cc == preCutName_cut_.end() ) 
-	{
-	  STDOUT("ERROR: did not find variableName = "<<s<<" neither in cutName_cut_ nor in preCutName_cut_. Returning");
-	}
+      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
     }
   cut * c = & (cc->second);
   return (c->maxValue2);
@@ -422,10 +460,10 @@ bool baseClass::fillCutHistos()
       if( c->filled )
 	{
 	  c->histo1.Fill( c->value );
-	  if( passedAllPreviousCuts(c->variableName) )        c->histo2.Fill( c->value );
-	  if( passedAllOtherSameLevelCuts(c->variableName) )  c->histo3.Fill( c->value );
-	  if( passedAllOtherCuts(c->variableName) )           c->histo4.Fill( c->value );
-	  if( passedCut("all") )                              c->histo5.Fill( c->value );
+	  if( passedAllPreviousCuts(c->variableName) )                c->histo2.Fill( c->value );
+	  if( passedAllOtherSameAndLowerLevelCuts(c->variableName) )  c->histo3.Fill( c->value );
+	  if( passedAllOtherCuts(c->variableName) )                   c->histo4.Fill( c->value );
+	  if( passedCut("all") )                                      c->histo5.Fill( c->value );
 	}
     }
   return ret;
@@ -494,10 +532,10 @@ bool baseClass::writeCutEfficFile()
        it != orderedCutNames_.end(); it++) 
     {
       cut * c = & (cutName_cut_.find(*it)->second);
-      c->effRel = (double) c->nEvtPassed / (double) c->nEvtInput;
-      c->effRelErr = sqrt( (double) c->effRel * (1.0 - (double) c->effRel) / (double) c->nEvtInput );
-      c->effAbs = (double) c->nEvtPassed / (double) nEnt;
-      c->effAbsErr = sqrt( (double) c->effAbs * (1.0 - (double) c->effAbs) / (double) nEnt );
+      double effRel = (double) c->nEvtPassed / (double) c->nEvtInput;
+      double effRelErr = sqrt( (double) effRel * (1.0 - (double) effRel) / (double) c->nEvtInput );
+      double effAbs = (double) c->nEvtPassed / (double) nEnt;
+      double effAbsErr = sqrt( (double) effAbs * (1.0 - (double) effAbs) / (double) nEnt );
 
       std::stringstream ssm1, ssM1, ssm2,ssM2;
       ssm1 << fixed << setprecision(4) << c->minValue1;
@@ -529,10 +567,10 @@ bool baseClass::writeCutEfficFile()
 	 << setw(15) << c->nEvtInput
 	 << setw(15) << c->nEvtPassed
 	 << setprecision(5) 
-	 << setw(15) << c->effRel
-	 << setw(15) << c->effRelErr
-	 << setw(15) << c->effAbs
-	 << setw(15) << c->effAbsErr
+	 << setw(15) << effRel
+	 << setw(15) << effRelErr
+	 << setw(15) << effAbs
+	 << setw(15) << effAbsErr
 	 << endl;
     }
   // Any failure mode to implement?
@@ -571,7 +609,7 @@ double baseClass::decodeCutValue(const string& s)
     {
        ret = 9999999;
     }
-  else if ( s == "-inf")
+  else if ( s == "-inf" || s == "-" )
     {
        ret = -9999999;
     }
@@ -579,6 +617,5 @@ double baseClass::decodeCutValue(const string& s)
     {
        ret = atof( s.c_str() );
     }
-  //STDOUT("ret = " << ret);
   return ret;
 }
