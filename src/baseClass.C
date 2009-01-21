@@ -475,7 +475,7 @@ bool baseClass::writeCutEfficFile()
   os << fixed; 
   os.precision(4); 
 
-  os << setw(3) << "0"
+  os << setw(3) << "1"
      << setw(15) << "nocut" 
      << setprecision(4) 
      << setw(15) << "-inf"
