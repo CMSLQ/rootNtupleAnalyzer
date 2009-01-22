@@ -30,7 +30,7 @@ baseClass::~baseClass()
 
 void baseClass::init()
 {
-  STDOUT("begin")
+  STDOUT("begin");
     //std::cout << "baseClass::init(): begin " << std::endl;
 
   tree_ = NULL;
@@ -48,10 +48,9 @@ void baseClass::init()
 
   //  for (map<string, cut>::iterator it = cutName_cut_.begin(); 
   //   it != cutName_cut_.end(); it++) STDOUT("cutName_cut->first = "<<it->first)
-  for (vector<string>::iterator it = orderedCutNames_.begin(); 
-       it != orderedCutNames_.end(); it++) STDOUT("orderedCutNames_ = "<<*it)
-
-  std::cout << "baseClass::init(): end " << std::endl;
+  //  for (vector<string>::iterator it = orderedCutNames_.begin(); 
+  //       it != orderedCutNames_.end(); it++) STDOUT("orderedCutNames_ = "<<*it)
+  STDOUT("end");
 }
 
 void baseClass::readInputList()
@@ -92,16 +91,29 @@ void baseClass::readCutFile()
   ifstream is(cutFile_->c_str());
   if(is.good())
     {
-      STDOUT("Reading file: " << *cutFile_ );
+      //      STDOUT("Reading file: " << *cutFile_ );
       int id=0;
       while( getline(is,s) )
         {
           STDOUT("read line: " << s);
           if (s[0] == '#') continue;
 	  vector<string> v = split(s);
+	  map<string, cut>::iterator cc = cutName_cut_.find(v[0]);
+	  if( cc != cutName_cut_.end() )
+	    {
+	      STDOUT("ERROR: variableName = "<< v[0] << " exists already in cutName_cut_. Returning.");
+	      return;
+	    } 
+
 	  int level_int = atoi( v[5].c_str() );
 	  if(level_int == -1)
 	    {
+	      map<string, preCut>::iterator cc = preCutName_cut_.find(v[0]);
+	      if( cc != preCutName_cut_.end() )
+		{
+		  STDOUT("ERROR: variableName = "<< v[0] << " exists already in preCutName_cut_. Returning.");
+		  return;
+		} 
 	      preCutInfo_ << "### Preliminary cut values: " << s <<endl;
 	      preCut thisPreCut;
 	      thisPreCut.variableName =     v[0];
@@ -167,11 +179,11 @@ void baseClass::readCutFile()
 	  cutName_cut_[thisCut.variableName]=thisCut;
 
 	}
-      cout << "baseClass::readCutFile: Finished reading cutFile: " << *cutFile_ << endl;
+      STDOUT( "baseClass::readCutFile: Finished reading cutFile: " << *cutFile_ );
     }
   else
     {
-      cout << "baseClass::readCutFile: ERROR opening cutFile:" << *cutFile_ << endl;
+      STDOUT("ERROR opening cutFile:" << *cutFile_ );
       exit (1);
     }
   is.close();
