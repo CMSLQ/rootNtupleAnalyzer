@@ -87,6 +87,7 @@ class baseClass : public rootNtupleClass {
   string * treeName_; // Name of input tree objects in (.root) files
   TTree * tree_;
   string * cutEfficFile_;
+  std::stringstream preCutInfo_;
   map<string, preCut> preCutName_cut_;
   map<string, cut> cutName_cut_;
   vector<string> orderedCutNames_; 

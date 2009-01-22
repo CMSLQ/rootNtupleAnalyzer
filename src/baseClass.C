@@ -102,6 +102,7 @@ void baseClass::readCutFile()
 	  int level_int = atoi( v[5].c_str() );
 	  if(level_int == -1)
 	    {
+	      preCutInfo_ << "### Preliminary cut values: " << s <<endl;
 	      preCut thisPreCut;
 	      thisPreCut.variableName =     v[0];
 	      thisPreCut.value1  = decodeCutValue( v[1] );
@@ -508,16 +509,21 @@ bool baseClass::writeCutEfficFile()
   int nEnt = fChain->GetEntriesFast();
   string cutEfficFile = *cutEfficFile_ + ".dat";
   ofstream os(cutEfficFile.c_str());
-  os <<"idx           name           min1           max1           min2           max2              N          Npass         EffRel      errEffRel         EffAbs      errEffAbs"<<endl;
 
-  os << fixed; 
+  os << "################################## Preliminary Cut Values ###################################################################\n"
+     << "########################### variableName              value1       value2               value3          value4          level\n"
+     << preCutInfo_.str();
+
   os.precision(4); 
-
-  os << setw(3) << "1"
+  os << "################################## Cuts #####################################################################################\n"
+     <<"#id   variableName           min1           max1           min2           max2          level              N          Npass         EffRel      errEffRel         EffAbs      errEffAbs"<<endl
+     << fixed
+     << setw(3) << "0"
      << setw(15) << "nocut" 
      << setprecision(4) 
-     << setw(15) << "-inf"
-     << setw(15) << "+inf"
+     << setw(15) << "-"
+     << setw(15) << "-"
+     << setw(15) << "-"
      << setw(15) << "-"
      << setw(15) << "-"
      << setw(15) << nEnt
@@ -564,6 +570,7 @@ bool baseClass::writeCutEfficFile()
 	 << setw(15) << ( ( c->maxValue1 ==  9999999.0 ) ? "+inf" : ssM1.str() )
 	 << setw(15) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssm2.str() )
 	 << setw(15) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssM2.str() )
+	 << setw(15) << c->level_int
 	 << setw(15) << c->nEvtInput
 	 << setw(15) << c->nEvtPassed
 	 << setprecision(5) 
