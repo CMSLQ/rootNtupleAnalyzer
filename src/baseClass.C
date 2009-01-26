@@ -58,6 +58,9 @@ void baseClass::readInputList()
 
   TChain *chain = new TChain(treeName_->c_str());
   char pName[500];
+  skimWasMade_ = true;
+  NBeforeSkim_ = 0;
+  int NBeforeSkim;
 
   std::cout << "baseClass::readinputList(): inputList_ =  "<< *inputList_ << std::endl;
 
@@ -68,8 +71,11 @@ void baseClass::readInputList()
       while( is.getline(pName, 500, '\n') )
         {
           if (pName[0] == '#') continue;
-          cout << "baseClass::readInputList: Adding file: " << pName << endl;
+          STDOUT("Adding file: " << pName);
           chain->Add(pName);
+	  NBeforeSkim = getGlobalInfoNstart(pName);
+	  NBeforeSkim_ = NBeforeSkim_ + NBeforeSkim;
+	  STDOUT("Initial number of events: NBeforeSkim, NBeforeSkim_ = "<<NBeforeSkim<<", "<<NBeforeSkim_);
         }
       tree_ = chain;
       cout << "baseClass::readInputList: Finished reading list: " << *inputList_ << endl;
@@ -526,11 +532,12 @@ bool baseClass::writeCutEfficFile()
      << "########################### variableName              value1       value2               value3          value4          level\n"
      << preCutInfo_.str();
 
+  int cutIdPed=0;
   os.precision(4); 
   os << "################################## Cuts #####################################################################################\n"
      <<"#id   variableName           min1           max1           min2           max2          level              N          Npass         EffRel      errEffRel         EffAbs      errEffAbs"<<endl
      << fixed
-     << setw(3) << "0"
+     << setw(3) << cutIdPed 
      << setw(15) << "nocut" 
      << setprecision(4) 
      << setw(15) << "-"
@@ -538,22 +545,47 @@ bool baseClass::writeCutEfficFile()
      << setw(15) << "-"
      << setw(15) << "-"
      << setw(15) << "-"
-     << setw(15) << nEnt
-     << setw(15) << nEnt
+     << setw(15) << (skimWasMade_ ? NBeforeSkim_ : nEnt )
+     << setw(15) << (skimWasMade_ ? NBeforeSkim_ : nEnt )
      << setprecision(5) 
      << setw(15) << "1.00000"
      << setw(15) << "0.00000"
      << setw(15) << "1.00000"
      << setw(15) << "0.00000"
      << endl;
+
+  double effRel = (double) nEnt / (double) NBeforeSkim_;
+  double effRelErr = sqrt( (double) effRel * (1.0 - (double) effRel) / (double) NBeforeSkim_ );
+  double effAbs = effRel;
+  double effAbsErr = effRelErr;
+  if(skimWasMade_)
+    {
+      os << fixed
+	 << setw(3) << ++cutIdPed
+	 << setw(15) << "skim" 
+	 << setprecision(4) 
+	 << setw(15) << "-"
+	 << setw(15) << "-"
+	 << setw(15) << "-"
+	 << setw(15) << "-"
+	 << setw(15) << "-"
+	 << setw(15) << NBeforeSkim_
+	 << setw(15) << nEnt
+	 << setprecision(5) 
+	 << setw(15) << effRel
+	 << setw(15) << effRelErr
+	 << setw(15) << effAbs
+	 << setw(15) << effAbsErr
+	 << endl;
+    }
   for (vector<string>::iterator it = orderedCutNames_.begin(); 
        it != orderedCutNames_.end(); it++) 
     {
       cut * c = & (cutName_cut_.find(*it)->second);
-      double effRel = (double) c->nEvtPassed / (double) c->nEvtInput;
-      double effRelErr = sqrt( (double) effRel * (1.0 - (double) effRel) / (double) c->nEvtInput );
-      double effAbs = (double) c->nEvtPassed / (double) nEnt;
-      double effAbsErr = sqrt( (double) effAbs * (1.0 - (double) effAbs) / (double) nEnt );
+      effRel = (double) c->nEvtPassed / (double) c->nEvtInput;
+      effRelErr = sqrt( (double) effRel * (1.0 - (double) effRel) / (double) c->nEvtInput );
+      effAbs = (double) c->nEvtPassed / (double) nEnt;
+      effAbsErr = sqrt( (double) effAbs * (1.0 - (double) effAbs) / (double) nEnt );
 
       std::stringstream ssm1, ssM1, ssm2,ssM2;
       ssm1 << fixed << setprecision(4) << c->minValue1;
@@ -574,7 +606,7 @@ bool baseClass::writeCutEfficFile()
 	{
 	  ssM2 << fixed << setprecision(4) << c->maxValue2;
 	}
-      os << setw(3) << c->id 
+      os << setw(3) << cutIdPed+c->id 
 	 << setw(15) << c->variableName 
 	 << setprecision(4)
 	 << fixed 
@@ -637,4 +669,31 @@ double baseClass::decodeCutValue(const string& s)
        ret = atof( s.c_str() );
     }
   return ret;
+}
+
+int baseClass::getGlobalInfoNstart(char * pName)
+{
+  int NBeforeSkim = 0;
+  TFile f(pName);
+  //f.cd();
+  TTree * tree2;
+  string s;
+  s = *treeName_ + "_globalInfo";
+  tree2 = (TTree*)gDirectory->Get(s.c_str());
+  if( !tree2 ) 
+    {
+      STDOUT("GlobalInfo tree named "<<s<<"not found. Will assume skim was not made for ALL files.");
+      skimWasMade_ = false;
+      return NBeforeSkim;
+    }
+  TBranch * b_Nstart;
+  tree2->SetMakeClass(1);
+  tree2->SetBranchAddress("Nstart", &NBeforeSkim, &b_Nstart);
+  Long64_t l = 0;
+  tree2->LoadTree(l);
+  tree2->GetEntry(l);   
+  //STDOUT(pName<<"  "<< NBeforeSkim) ;
+  //	  f.Close();
+
+  return NBeforeSkim;
 }

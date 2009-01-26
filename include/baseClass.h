@@ -85,7 +85,8 @@ class baseClass : public rootNtupleClass {
   string * inputList_;
   string * cutFile_;
   string * treeName_; // Name of input tree objects in (.root) files
-  TTree * tree_;
+  TTree * tree_; // main tree
+  TTree * tree2_; // tree for globalInfo
   string * cutEfficFile_;
   std::stringstream preCutInfo_;
   map<string, preCut> preCutName_cut_;
@@ -101,6 +102,9 @@ class baseClass : public rootNtupleClass {
   bool baseClass::sortCuts(const cut&, const cut&);
   vector<string> split(const string& s);
   double decodeCutValue(const string& s);
+  bool skimWasMade_;
+  int getGlobalInfoNstart( char* );
+  int NBeforeSkim_;
 };
 
 #endif
