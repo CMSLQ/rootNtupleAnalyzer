@@ -159,7 +159,15 @@ void baseClass::readCutFile()
 	  thisCut.histoMax   = atof( v[8].c_str() );
 	  // Not filled from file
 	  thisCut.id=++id;
-	  string s1 = "cutHisto_noCuts_________________" + thisCut.variableName;
+	  string s1;
+	  if(skimWasMade_)
+	    {
+	      s1 = "cutHisto_skim___________________" + thisCut.variableName;
+	    }
+	  else
+	    {
+	      s1 = "cutHisto_noCuts_________________" + thisCut.variableName;
+	    }
 	  string s2 = "cutHisto_allPreviousCuts________" + thisCut.variableName;
 	  string s3 = "cutHisto_allOthrSmAndLwrLvlCuts_" + thisCut.variableName;
 	  string s4 = "cutHisto_allOtherCuts___________" + thisCut.variableName;
