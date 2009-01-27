@@ -83,7 +83,7 @@ dictFinalTables = {}
 def UpdateTable(inputTable, outputTable):
     if not outputTable:
         for j,line in enumerate( inputTable ):
-            outputTable[int(j)]={'name': inputTable[j]['name'],
+            outputTable[int(j)]={'variableName': inputTable[j]['variableName'],
                                  'min1': inputTable[j]['min1'],
                                  'max1': inputTable[j]['max1'],
                                  'min2': inputTable[j]['min2'],
@@ -99,7 +99,7 @@ def UpdateTable(inputTable, outputTable):
                                  }
     else:
         for j,line in enumerate( inputTable ):
-            outputTable[int(j)]={'name': inputTable[j]['name'],
+            outputTable[int(j)]={'variableName': inputTable[j]['variableName'],
                                  'min1': inputTable[j]['min1'],
                                  'max1': inputTable[j]['max1'],
                                  'min2': inputTable[j]['min2'],
@@ -119,7 +119,7 @@ def UpdateTable(inputTable, outputTable):
 def CalculateEfficiency(table):
     for j,line in enumerate( table ):
         if( j == 0):
-            table[int(j)] = {'name':       table[int(j)]['name'],
+            table[int(j)] = {'variableName':       table[int(j)]['variableName'],
                              'min1':        table[int(j)]['min1'],
                              'max1':        table[int(j)]['max1'],
                              'min2':        table[int(j)]['min2'],
@@ -161,7 +161,7 @@ def CalculateEfficiency(table):
                 EffAbs = 0
                 errEffAbs = 0 
             
-            table[int(j)]={'name': table[int(j)]['name'],
+            table[int(j)]={'variableName': table[int(j)]['variableName'],
                            'min1': table[int(j)]['min1'],
                            'max1': table[int(j)]['max1'],
                            'min2': table[int(j)]['min2'],
@@ -183,7 +183,7 @@ def CalculateEfficiency(table):
 
 def WriteTable(table, name, file):
     print >>file, name
-    print >>file, "name".rjust(15),
+    print >>file, "variableName".rjust(15),
     print >>file, "min1".rjust(15),
     print >>file, "max1".rjust(15),
     print >>file, "min2".rjust(15),
@@ -196,13 +196,13 @@ def WriteTable(table, name, file):
     print >>file, "errEffAbs".rjust(15)
 
     for j, line in enumerate(table):
-        print >>file, table[j]['name'].rjust(15),
+        print >>file, table[j]['variableName'].rjust(15),
         print >>file, table[j]['min1'].rjust(15),
         print >>file, table[j]['max1'].rjust(15),
         print >>file, table[j]['min2'].rjust(15),
         print >>file, table[j]['max2'].rjust(15),
-        print >>file, ("%.01f" % table[j]['Npass']).rjust(15),
-        print >>file, ("%.01f" % table[j]['errNpass']).rjust(15),
+        print >>file, ("%.02f" % table[j]['Npass']).rjust(15),
+        print >>file, ("%.02f" % table[j]['errNpass']).rjust(15),
         print >>file, ("%.01e" % table[j]['EffRel']).rjust(15),
         print >>file, ("%.01e" % table[j]['errEffRel']).rjust(15),
         print >>file, ("%.01e" % table[j]['EffAbs']).rjust(15),
@@ -214,7 +214,7 @@ def WriteTable(table, name, file):
     
     print "\n"
     print name
-    print "name".rjust(15),
+    print "variableName".rjust(15),
     print "min1".rjust(15),
     print "max1".rjust(15),
     print "min2".rjust(15),
@@ -227,13 +227,13 @@ def WriteTable(table, name, file):
     print "errEffAbs".rjust(15)
 
     for j, line in enumerate(table):
-        print table[j]['name'].rjust(15),
+        print table[j]['variableName'].rjust(15),
         print table[j]['min1'].rjust(15),
         print table[j]['max1'].rjust(15),
         print table[j]['min2'].rjust(15),
         print table[j]['max2'].rjust(15),
-        print ("%.01f" % table[j]['Npass']).rjust(15),
-        print ("%.01f" % table[j]['errNpass']).rjust(15),
+        print ("%.02f" % table[j]['Npass']).rjust(15),
+        print ("%.02f" % table[j]['errNpass']).rjust(15),
         print ("%.01e" % table[j]['EffRel']).rjust(15),
         print ("%.01e" % table[j]['errEffRel']).rjust(15),
         print ("%.01e" % table[j]['EffAbs']).rjust(15),
@@ -279,7 +279,7 @@ for n, lin in enumerate( open( options.inputList ) ):
         lin1 = string.strip(lin1,"\n")
 
         (dataset , xsection_val) = string.split(lin1)
-        #print dataset + " " + xsection_val
+        print dataset + " " + xsection_val
 
         dataset_mod_1 = dataset[1:].replace('/','__')
         #print dataset_mod_1 + " " + xsection_val
@@ -299,12 +299,18 @@ for n, lin in enumerate( open( options.inputList ) ):
     #---Read .dat table for current dataset
     data={}
     column=[]
-    
+    lineCounter = int(0)
+
     for j,line in enumerate( open( inputDataFile ) ):
+
+        if( re.search("###", line) ):
+            continue
+
         line = string.strip(line,"\n")
+        #print "---> lineCounter: " , lineCounter
         print line
-        
-        if j == 0:
+
+        if lineCounter == 0:
             for i,piece in enumerate(line.split()):
                 column.append(piece)
         else:
@@ -316,6 +322,8 @@ for n, lin in enumerate( open( options.inputList ) ):
                     data[row][ column[i] ] = piece
                     #print data[row][ column[i] ] 
 
+        lineCounter = lineCounter+1
+
     # example
     #Ntot = int(data[0]['N'])
     #print Ntot
@@ -323,7 +331,10 @@ for n, lin in enumerate( open( options.inputList ) ):
     #---Calculate weight
     Ntot = int(data[0]['N'])
     xsection_X_intLumi = float(xsection_val) * float(options.intLumi)
-    weight = xsection_X_intLumi / Ntot 
+    if( Ntot == 0 ):
+        weight = float(0)
+    else:
+        weight = xsection_X_intLumi / Ntot 
     print "weight: " + str(weight)
     
     #---Create new table using weight
@@ -331,43 +342,53 @@ for n, lin in enumerate( open( options.inputList ) ):
     
     for j,line in enumerate( data ):
         if(j == 0):
-            newtable[int(j)]={'name': data[j]['name'],
+            newtable[int(j)]={'variableName': data[j]['variableName'],
                               'min1': "-",
                               'max1': "-",
                               'min2': "-",
                               'max2': "-",
-                              'N': "%.01f" % ( Ntot * weight ),
+                              'N': "%.03f" % ( Ntot * weight ),
                               'errN': int(0),
-                              'Npass': "%.01f" % ( Ntot * weight ),
+                              'Npass': "%.03f" % ( Ntot * weight ),
                               'errNpass': int(0),
                               }
 
         else:
             N = ( float(data[j]['N']) * weight )
             errN = ( float(data[j-1]["errEffAbs"]) * xsection_X_intLumi )
-            if( float(N) > 0 ):
-                errRelN = errN / N 
-            else:
-                errRelN = float(0)
-
+            print errN
+            if(str(errN) == "nan"):
+                errN = 0
+                
+                #            if( float(N) > 0 and float(errN) > 0 ):
+                #                errRelN = errN / N 
+                #            else:
+                #                errRelN = float(0)
             
             Npass = ( float(data[j]['Npass']) * weight) 
             errNpass = ( float(data[j]["errEffAbs"]) * xsection_X_intLumi )
-            if( float(Npass) > 0 ):
-                errRelNpass = errNpass / Npass
-            else:
-                errRelNpass = float(0)
+            print errNpass
+            if(str(errNpass) == "nan"):
+                errNpass = 0
+
+                #            if( float(Npass) > 0 and float(errNpass) > 0 ):
+                #                errRelNpass = errNpass / Npass
+                #            else:
+                #                errRelNpass = float(0)
             
-            newtable[int(j)]={'name': data[j]['name'],
+            newtable[int(j)]={'variableName': data[j]['variableName'],
                               'min1': data[j]['min1'],
                               'max1': data[j]['max1'],
                               'min2': data[j]['min2'],
                               'max2': data[j]['max2'],
-                              'N':           "%.01f" % N,
-                              'errN':        "%.01f" % errN,
-                              'Npass':       "%.01f" % Npass,
-                              'errNpass':    "%.01f" % errNpass,
+                              'N':           "%.03f" % N,
+                              'errN':        "%.03f" % errN,
+                              'Npass':       "%.03f" % Npass,
+                              'errNpass':    "%.03f" % errNpass,
                               }
+
+            #print newtable
+
 
     #---Combine tables from different datasets
     

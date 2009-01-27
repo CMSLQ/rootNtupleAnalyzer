@@ -170,12 +170,18 @@ for n, lin in enumerate( open( options.inputList ) ):
     #---Read .dat table for current dataset
     data={}
     column=[]
+    lineCounter = int(0)
     
     for j,line in enumerate( open( inputDataFile ) ):
+
+        if( re.search("###", line) ):
+            continue
+
         line = string.strip(line,"\n")
-        #print line
+        #print "---> lineCounter: " , lineCounter
+        print line
         
-        if j == 0:
+        if lineCounter == 0:
             for i,piece in enumerate(line.split()):
                 column.append(piece)
         else:
@@ -187,14 +193,19 @@ for n, lin in enumerate( open( options.inputList ) ):
                     data[row][ column[i] ] = piece
                     #print data[row][ column[i] ] 
 
+        lineCounter = lineCounter+1
+
     # example
     #Ntot = int(data[0]['N'])
     #print Ntot
 
     #---Calculate weight
     Ntot = int(data[0]['N'])
-    weight = float(xsection_val) * float(options.intLumi) / Ntot 
-    #print "weight: " + str(weight)
+    if( Ntot == 0 ):
+        weight = float(0)
+    else:
+        weight = float(xsection_val) * float(options.intLumi) / Ntot  
+    print "weight: " + str(weight)
 
     
     #---Combine histograms using PYROOT
