@@ -190,11 +190,10 @@ for n, lin in enumerate( open( options.inputList ) ):
             histoName = file.GetListOfKeys()[h].GetName()
             htemp = file.Get(histoName)
 
-            #### TEMPORARY FIX TO SKIP THE 2D HISTOGRAMS
-            if(htemp.GetYaxis().GetNbins()>1):
+            #thanks Riccardo
+            if "TH2" in htemp.__repr__():
                 continue
-            ####
-            
+
             if(n == 0):
                 dictFinalHisto[sample][h] = TH1F()
                 dictFinalHisto[sample][h].SetName("histo1D__" + sample + "__" + histoName )
