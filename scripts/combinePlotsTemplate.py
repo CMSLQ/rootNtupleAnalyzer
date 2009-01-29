@@ -77,40 +77,6 @@ for l,line in enumerate( open( options.sampleListForMerging ) ):
 dictFinalHisto = {}
 
 #--- functions
-def UpdateHistograms(name, N, listHisto, inputRootFile, weight, dataset_mod, listNames):
-    file = TFile(inputRootFile);
-    #file.ls()
-    print N
-    print name
-    nHistos = int( file.GetListOfKeys().GetEntries() )
-
-    htemp = TH1F()
-
-    for h in range(0, nHistos):
-        print file.GetListOfKeys()[h].GetName()
-
-        htemp = file.Get(file.GetListOfKeys()[h].GetName())
-        #print htemp.GetEntries()
-
-        listHisto[name][h].GetEntries()
-
-        toBeUpdated = False
-        for i, String in enumerate (listNames[name]):
-            print String
-            if( re.search(String, dataset_mod) ):
-                print "toBeUpdated"
-                toBeUpdated = True
-                break
-
-        print toBeUpdated
-
-        if(toBeUpdated):
-            listHisto[name][h].Add(htemp, weight)
-
-            #    outputHisto.Add(htemp, currentWeight)
-
-    file.Close()
-    return
 
 #---Loop over datasets
 print "\n"
@@ -206,10 +172,8 @@ for n, lin in enumerate( open( options.inputList ) ):
     else:
         weight = float(xsection_val) * float(options.intLumi) / Ntot  
     print "weight: " + str(weight)
-
     
     #---Combine histograms using PYROOT
-
     file = TFile(inputRootFile)
     nHistos = int( file.GetListOfKeys().GetEntries() )
     #print "nHistos: " , nHistos, "\n"
@@ -226,6 +190,11 @@ for n, lin in enumerate( open( options.inputList ) ):
             histoName = file.GetListOfKeys()[h].GetName()
             htemp = file.Get(histoName)
 
+            #### TEMPORARY FIX TO SKIP THE 2D HISTOGRAMS
+            if(htemp.GetYaxis().GetNbins()>1):
+                continue
+            ####
+            
             if(n == 0):
                 dictFinalHisto[sample][h] = TH1F()
                 dictFinalHisto[sample][h].SetName("histo1D__" + sample + "__" + histoName )
