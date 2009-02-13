@@ -27,7 +27,7 @@ Instructions:
 -------------
 
 1) Checkout the code:
-   export CVSROOT=:kserver:cmscvs.cern.ch:/cvs_server/repositories/CMSSW
+   export CVSROOT=:gserver:cmscvs.cern.ch:/cvs_server/repositories/CMSSW
    cvs checkout -d rootNtupleAnalyzer UserCode/Leptoquarks/rootNtupleAnalyzer
 
 2) Generate the rootNtupleClass:
