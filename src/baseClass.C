@@ -532,7 +532,8 @@ bool baseClass::updateCutEffic()
 bool baseClass::writeCutEfficFile()
 {
   bool ret = true;
-  int nEnt = fChain->GetEntriesFast();
+  int nEntRoottuple = fChain->GetEntriesFast();
+  int nEntTot = (skimWasMade_ ? NBeforeSkim_ : nEntRoottuple );
   string cutEfficFile = *cutEfficFile_ + ".dat";
   ofstream os(cutEfficFile.c_str());
 
@@ -553,8 +554,8 @@ bool baseClass::writeCutEfficFile()
      << setw(15) << "-"
      << setw(15) << "-"
      << setw(15) << "-"
-     << setw(15) << (skimWasMade_ ? NBeforeSkim_ : nEnt )
-     << setw(15) << (skimWasMade_ ? NBeforeSkim_ : nEnt )
+     << setw(15) << nEntTot
+     << setw(15) << nEntTot
      << setprecision(5) 
      << setw(15) << "1.00000"
      << setw(15) << "0.00000"
@@ -562,12 +563,16 @@ bool baseClass::writeCutEfficFile()
      << setw(15) << "0.00000"
      << endl;
 
-  double effRel = (double) nEnt / (double) NBeforeSkim_;
-  double effRelErr = sqrt( (double) effRel * (1.0 - (double) effRel) / (double) NBeforeSkim_ );
-  double effAbs = effRel;
-  double effAbsErr = effRelErr;
+  double effRel;
+  double effRelErr;
+  double effAbs;
+  double effAbsErr;
   if(skimWasMade_)
     {
+      effRel = (double) nEntRoottuple / (double) NBeforeSkim_;
+      effRelErr = sqrt( (double) effRel * (1.0 - (double) effRel) / (double) NBeforeSkim_ );
+      effAbs = effRel;
+      effAbsErr = effRelErr;
       os << fixed
 	 << setw(3) << ++cutIdPed
 	 << setw(15) << "skim" 
@@ -578,7 +583,7 @@ bool baseClass::writeCutEfficFile()
 	 << setw(15) << "-"
 	 << setw(15) << "-"
 	 << setw(15) << NBeforeSkim_
-	 << setw(15) << nEnt
+	 << setw(15) << nEntRoottuple
 	 << setprecision(5) 
 	 << setw(15) << effRel
 	 << setw(15) << effRelErr
@@ -592,8 +597,8 @@ bool baseClass::writeCutEfficFile()
       cut * c = & (cutName_cut_.find(*it)->second);
       effRel = (double) c->nEvtPassed / (double) c->nEvtInput;
       effRelErr = sqrt( (double) effRel * (1.0 - (double) effRel) / (double) c->nEvtInput );
-      effAbs = (double) c->nEvtPassed / (double) nEnt;
-      effAbsErr = sqrt( (double) effAbs * (1.0 - (double) effAbs) / (double) nEnt );
+      effAbs = (double) c->nEvtPassed / (double) nEntTot;
+      effAbsErr = sqrt( (double) effAbs * (1.0 - (double) effAbs) / (double) nEntTot );
 
       std::stringstream ssm1, ssM1, ssm2,ssM2;
       ssm1 << fixed << setprecision(4) << c->minValue1;
