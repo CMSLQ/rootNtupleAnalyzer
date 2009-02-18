@@ -538,16 +538,16 @@ bool baseClass::writeCutEfficFile()
   ofstream os(cutEfficFile.c_str());
 
   os << "################################## Preliminary Cut Values ###################################################################\n"
-     << "########################### variableName              value1       value2               value3          value4          level\n"
+     << "########################### variableName                        value1          value2          value3          value4          level\n"
      << preCutInfo_.str();
 
   int cutIdPed=0;
   os.precision(4); 
   os << "################################## Cuts #####################################################################################\n"
-     <<"#id   variableName           min1           max1           min2           max2          level              N          Npass         EffRel      errEffRel         EffAbs      errEffAbs"<<endl
+     <<"#id             variableName           min1           max1           min2           max2          level              N          Npass         EffRel      errEffRel         EffAbs      errEffAbs"<<endl
      << fixed
      << setw(3) << cutIdPed 
-     << setw(15) << "nocut" 
+     << setw(25) << "nocut" 
      << setprecision(4) 
      << setw(15) << "-"
      << setw(15) << "-"
@@ -575,7 +575,7 @@ bool baseClass::writeCutEfficFile()
       effAbsErr = effRelErr;
       os << fixed
 	 << setw(3) << ++cutIdPed
-	 << setw(15) << "skim" 
+	 << setw(25) << "skim" 
 	 << setprecision(4) 
 	 << setw(15) << "-"
 	 << setw(15) << "-"
@@ -620,7 +620,7 @@ bool baseClass::writeCutEfficFile()
 	  ssM2 << fixed << setprecision(4) << c->maxValue2;
 	}
       os << setw(3) << cutIdPed+c->id 
-	 << setw(15) << c->variableName 
+	 << setw(25) << c->variableName 
 	 << setprecision(4)
 	 << fixed 
 	 << setw(15) << ( ( c->minValue1 == -9999999.0 ) ? "-inf" : ssm1.str() )
