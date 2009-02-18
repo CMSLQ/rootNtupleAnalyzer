@@ -27,7 +27,7 @@ struct cut {
   double maxValue2;
   int level_int;
   string level_str;
-  int histoNbins;
+  int histoNBins;
   double histoMin;
   double histoMax;
   // Not filled from file
@@ -74,6 +74,17 @@ class baseClass : public rootNtupleClass {
   double baseClass::getCutMaxValue1(const string& s);
   double baseClass::getCutMinValue2(const string& s);
   double baseClass::getCutMaxValue2(const string& s);
+
+  const TH1F& baseClass::getHisto_noCuts_or_skim(const string& s);
+  const TH1F& baseClass::getHisto_allPreviousCuts(const string& s);
+  const TH1F& baseClass::getHisto_allOthrSmAndLwrLvlCuts(const string& s);
+  const TH1F& baseClass::getHisto_allOtherCuts(const string& s);
+  const TH1F& baseClass::getHisto_allCuts(const string& s);
+
+  int    baseClass::getHistoNBins(const string& s);
+  double baseClass::getHistoMin(const string& s);
+  double baseClass::getHistoMax(const string& s);
+
 
   baseClass(string * inputList, string * cutFile, string * treeName, TString *outputFileName=0, string * cutEfficFile=0);
   virtual ~baseClass();

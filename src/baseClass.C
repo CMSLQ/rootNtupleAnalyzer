@@ -154,7 +154,7 @@ void baseClass::readCutFile()
 	  thisCut.maxValue2  = decodeCutValue( M2 );
 	  thisCut.level_int  = level_int;
 	  thisCut.level_str  =       v[5];
-	  thisCut.histoNbins = atoi( v[6].c_str() );
+	  thisCut.histoNBins = atoi( v[6].c_str() );
 	  thisCut.histoMin   = atof( v[7].c_str() );
 	  thisCut.histoMax   = atof( v[8].c_str() );
 	  // Not filled from file
@@ -172,11 +172,11 @@ void baseClass::readCutFile()
 	  string s3 = "cutHisto_allOthrSmAndLwrLvlCuts_" + thisCut.variableName;
 	  string s4 = "cutHisto_allOtherCuts___________" + thisCut.variableName;
 	  string s5 = "cutHisto_allCuts________________" + thisCut.variableName;
-	  thisCut.histo1 = TH1F (s1.c_str(),"", thisCut.histoNbins, thisCut.histoMin, thisCut.histoMax);
-	  thisCut.histo2 = TH1F (s2.c_str(),"", thisCut.histoNbins, thisCut.histoMin, thisCut.histoMax);
-	  thisCut.histo3 = TH1F (s3.c_str(),"", thisCut.histoNbins, thisCut.histoMin, thisCut.histoMax);
-	  thisCut.histo4 = TH1F (s4.c_str(),"", thisCut.histoNbins, thisCut.histoMin, thisCut.histoMax);
-	  thisCut.histo5 = TH1F (s5.c_str(),"", thisCut.histoNbins, thisCut.histoMin, thisCut.histoMax);
+	  thisCut.histo1 = TH1F (s1.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
+	  thisCut.histo2 = TH1F (s2.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
+	  thisCut.histo3 = TH1F (s3.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
+	  thisCut.histo4 = TH1F (s4.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
+	  thisCut.histo5 = TH1F (s5.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
 	  thisCut.histo1.Sumw2();
 	  thisCut.histo2.Sumw2();
 	  thisCut.histo3.Sumw2();
@@ -476,6 +476,100 @@ double baseClass::getCutMaxValue2(const string& s)
   cut * c = & (cc->second);
   return (c->maxValue2);
 }
+
+const TH1F& baseClass::getHisto_noCuts_or_skim(const string& s)
+{
+  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  if( cc == cutName_cut_.end() )
+    {
+      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
+    }
+
+  cut * c = & (cutName_cut_.find(s)->second);
+  return (c->histo1);
+}
+
+const TH1F& baseClass::getHisto_allPreviousCuts(const string& s)
+{
+  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  if( cc == cutName_cut_.end() )
+    {
+      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
+    }
+
+  cut * c = & (cutName_cut_.find(s)->second);
+  return (c->histo2);
+}
+
+const TH1F& baseClass::getHisto_allOthrSmAndLwrLvlCuts(const string& s)
+{
+  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  if( cc == cutName_cut_.end() )
+    {
+      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
+    }
+
+  cut * c = & (cutName_cut_.find(s)->second);
+  return (c->histo3);
+}
+
+const TH1F& baseClass::getHisto_allOtherCuts(const string& s)
+{
+  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  if( cc == cutName_cut_.end() )
+    {
+      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
+    }
+
+  cut * c = & (cutName_cut_.find(s)->second);
+  return (c->histo4);
+}
+
+const TH1F& baseClass::getHisto_allCuts(const string& s)
+{
+  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  if( cc == cutName_cut_.end() )
+    {
+      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
+    }
+
+  cut * c = & (cutName_cut_.find(s)->second);
+  return (c->histo5);
+}
+
+int baseClass::getHistoNBins(const string& s)
+{
+  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  if( cc == cutName_cut_.end() )
+    {
+      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
+    }
+  cut * c = & (cutName_cut_.find(s)->second);
+  return (c->histoNBins);
+}
+
+double baseClass::getHistoMin(const string& s)
+{
+  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  if( cc == cutName_cut_.end() )
+    {
+      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
+    }
+  cut * c = & (cutName_cut_.find(s)->second);
+  return (c->histoMin);
+}
+
+double baseClass::getHistoMax(const string& s)
+{
+  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  if( cc == cutName_cut_.end() )
+    {
+      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
+    }
+  cut * c = & (cutName_cut_.find(s)->second);
+  return (c->histoMax);
+}
+
 
 bool baseClass::fillCutHistos()
 {

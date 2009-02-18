@@ -42,6 +42,7 @@ void analysisClass::Loop()
    //pT 2nd ele
    TH1F *h_pT2ndEle = new TH1F ("h_pT2ndEle","",100,0,1000);
    h_pT2ndEle->Sumw2();
+
 #endif //end of USE_EXAMPLE
 
    /////////initialize variables
@@ -127,10 +128,18 @@ void analysisClass::Loop()
 
 #ifdef USE_EXAMPLE
    STDOUT("WARNING: using example code. In order NOT to use it, comment line that defines USE_EXAMPLE flag in Makefile.");   
+
    h_nEleFinal->Write();
    h_pT1stEle->Write();
    h_pT2ndEle->Write();
-#endif // end of USE_EXAMPLE
 
+   //pT of both electrons, to be built using the histograms produced automatically by baseClass
+   TH1F * h_pTElectrons = new TH1F ("h_pTElectrons","", getHistoNBins("pT1stEle"), getHistoMin("pT1stEle"), getHistoMax("pT1stEle"));
+   h_pTElectrons->Add( & getHisto_noCuts_or_skim("pT1stEle") ); // all histos can be retrieved, see other getHisto_xxxx methods in baseClass.h
+   h_pTElectrons->Add( & getHisto_noCuts_or_skim("pT2ndEle") );
+   //one could also do:  *h_pTElectrons = getHisto_noCuts_or_skim("pT1stEle") + getHisto_noCuts_or_skim("pT2ndEle");
+   h_pTElectrons->Write();
+   //one could also do:   const TH1F& h = getHisto_noCuts_or_skim// and use h
+#endif // end of USE_EXAMPLE
    std::cout << "analysisClass::Loop() ends" <<std::endl;   
 }
