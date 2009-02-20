@@ -650,11 +650,11 @@ bool baseClass::writeCutEfficFile()
      << setw(15) << "-"
      << setw(15) << nEntTot
      << setw(15) << nEntTot
-     << setprecision(5) 
-     << setw(15) << "1.00000"
-     << setw(15) << "0.00000"
-     << setw(15) << "1.00000"
-     << setw(15) << "0.00000"
+     << setprecision(11) 
+     << setw(15) << "1.00000000000"
+     << setw(15) << "0.00000000000"
+     << setw(15) << "1.00000000000"
+     << setw(15) << "0.00000000000"
      << endl;
 
   double effRel;
@@ -678,7 +678,7 @@ bool baseClass::writeCutEfficFile()
 	 << setw(15) << "-"
 	 << setw(15) << NBeforeSkim_
 	 << setw(15) << nEntRoottuple
-	 << setprecision(5) 
+	 << setprecision(11) 
 	 << setw(15) << effRel
 	 << setw(15) << effRelErr
 	 << setw(15) << effAbs
@@ -724,7 +724,7 @@ bool baseClass::writeCutEfficFile()
 	 << setw(15) << c->level_int
 	 << setw(15) << c->nEvtInput
 	 << setw(15) << c->nEvtPassed
-	 << setprecision(5) 
+	 << setprecision(11) 
 	 << setw(15) << effRel
 	 << setw(15) << effRelErr
 	 << setw(15) << effAbs
