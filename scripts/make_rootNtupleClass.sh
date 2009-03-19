@@ -2,9 +2,14 @@
 
 usage ()
 {
-        echo "Usage:   $0 -f rootFile -t TTreeName "
-        echo "where:   rootFile is the input root file and TTreeName is the name of the TTree to be analyzed"
-        echo "Example: $0 -f data/input/Exotica_LQtoUE_M250__Summer08_IDEAL_V9_v1__GEN-SIM-RECO_1.root -t RootTupleMaker"
+        echo ""
+        echo "Usage:   $0 -d directory -t TTreeName "
+        echo "where:   directory is the location of the *.root files to be analyzed"
+        echo "Example: $0 -d /home/data/RootTuples/Leptoquarks/V00-00-09_2009310_142420/output -t RootTupleMaker"
+        echo ""
+        echo "      Note: the option \"-d directory\" can be replaced by \"-f filename\" in case of a single root file to be analyzed"
+        echo "            Example: $0 -f data/input/Exotica_LQtoUE_M250__Summer08_IDEAL_V9_v1__GEN-SIM-RECO_1.root -t RootTupleMaker"
+        echo ""
         exit 1;
 }
 
@@ -13,24 +18,43 @@ while [ $# -gt 0 ]; # till there are parameters
 do
   case "$1" in
     -f) FILENAME="$2"; shift ;;
+    -d) DIRNAME="$2"; shift ;;
     -t) TTREENAME="$2"; shift ;;
     *) usage ;;
   esac
   shift  # get following parameters
 done
 
+if [ ! -z "${FILENAME}" ] && [ ! -z "${DIRNAME}" ] ; then
+  usage;
+  exit;
+fi
+
 cd `dirname $0`/../ ; # go to the directory rootNtupleAnalyzer/
 
+if [ ! -z "${FILENAME}" ] ; then
+  FILES=${FILENAME}
+elif [ ! -z "${DIRNAME}" ] ; then
+  FILES=`ls ${DIRNAME}/*.root`
+fi
+
 cat > temporaryMacro.C <<EOF
-
 {
-  TFile f("$FILENAME");
-  $TTREENAME->MakeClass("rootNtupleClass");
-}
+  TChain c("$TTREENAME");
+EOF
 
+for FILE in $FILES
+do
+  echo "  c.Add(\"${FILE}\"); " >> temporaryMacro.C
+done
+
+cat >> temporaryMacro.C <<EOF
+  c.MakeClass("rootNtupleClass");
+}
 EOF
 
 root -l -q temporaryMacro.C
+
 rm temporaryMacro.C
 if [ -f "rootNtupleClass.h" ] && [ -f "rootNtupleClass.C" ]; then
     echo "Moving rootNtupleClass.h/C to ./include/ and ./src/ directories ..."
