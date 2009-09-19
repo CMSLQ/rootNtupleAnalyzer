@@ -191,13 +191,17 @@ for n, lin in enumerate( open( options.inputList ) ):
             htemp = file.Get(histoName)
 
             #thanks Riccardo
-            if "TH2" in htemp.__repr__():
-                continue
-
             if(n == 0):
-                dictFinalHisto[sample][h] = TH1F()
-                dictFinalHisto[sample][h].SetName("histo1D__" + sample + "__" + histoName )
-                dictFinalHisto[sample][h].SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax())
+                if "TH2" in htemp.__repr__():
+                    dictFinalHisto[sample][h] = TH2F()
+                    dictFinalHisto[sample][h].SetName("histo2D__" + sample + "__" + histoName )
+                    dictFinalHisto[sample][h].SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax(),htemp.GetNbinsY(),htemp.GetYaxis().GetBinLowEdge(1),htemp.GetYaxis().GetBinUpEdge(htemp.GetNbinsY()))
+                    #continue
+
+                else:
+                    dictFinalHisto[sample][h] = TH1F()
+                    dictFinalHisto[sample][h].SetName("histo1D__" + sample + "__" + histoName )
+                    dictFinalHisto[sample][h].SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax(),)
 
             #print "current histo is : " , dictFinalHisto[sample][h].GetName()
 
