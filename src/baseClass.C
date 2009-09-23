@@ -240,6 +240,12 @@ void baseClass::readCutFile()
 			    pow(10,optimizeName_cut_.size()));
     }
 
+  // Create a histogram that will show events passing cuts
+  int cutsize=orderedCutNames_.size()+1;
+  if (skimWasMade_) ++cutsize;
+  gDirectory->cd();
+  eventcuts_=new TH1F("EventsPassingCuts","Events Passing Cuts",cutsize,0,cutsize);
+
   is.close();
 }
 
@@ -724,6 +730,7 @@ bool baseClass::writeCutHistos()
       TObjString test(x.str().c_str());
       test.Write();
     }
+  gDirectory->cd("..");
   // Any failure mode to implement?
   return ret;
 }
@@ -749,11 +756,8 @@ bool baseClass::writeCutEfficFile()
 
 
   bool ret = true;
-
-  // Create a histogram that will show events passing cuts
-  int cutsize=orderedCutNames_.size()+1;
-  if (skimWasMade_) ++cutsize;
-  eventcuts_=new TH1F("EventsPassingCuts","Events Passing Cuts",cutsize,0,cutsize);
+  
+  // Set bin labels for event counter histogram
   int bincounter=1;
   eventcuts_->GetXaxis()->SetBinLabel(bincounter,"NoCuts");
   ++bincounter;
